@@ -89,7 +89,9 @@ public class SshKeyManager {
 		    if (contents != null) {
 				String [] splittedKeys = contents.split(" ");
 				if (splittedKeys!=null && splittedKeys.length==3) {
-					key = new SshKeyStruct(splittedKeys[2], splittedKeys[1]);
+					key = new SshKeyStruct();
+					key.setName(splittedKeys[2]);
+					key.setKey(splittedKeys[1]);
 					keys.add(key);
 				}
 			}

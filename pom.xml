@@ -38,7 +38,7 @@
         <test.servermanager.endpoint>https://www.ovh.com</test.servermanager.endpoint>
         <test.servermanager.apiversion>1.0</test.servermanager.apiversion>
         <test.servermanager.identity>LOGIN</test.servermanager.identity>
-		<jsonizer.version>1.2.2</jsonizer.version>
+		<jsonizer.version>1.2.3</jsonizer.version>
     </properties>
     
     <dependencies>

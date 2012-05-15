@@ -1,20 +1,13 @@
 package org.jclouds.ovh.service;
 
 import java.net.URL;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ovh.ws.cloud._public.instance.r1.structure.CredentialsStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.DistributionStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.InstanceStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.OfferStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.ProjectStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.ZoneStruct;
 import com.ovh.ws.common.OvhWsException;
 import com.ovh.ws.sessionhandler.r3.SessionHandler;
-import com.ovh.ws.sessionhandler.r3.structure.SessionWithToken;;
+import com.ovh.ws.sessionhandler.r3.structure.SessionWithToken;
 
 public class PublicCloudSessionHandler {
 
@@ -29,18 +22,18 @@ public class PublicCloudSessionHandler {
 	
 	
 	
-	protected ProjectStruct currentProject = null;
-	protected List<InstanceStruct> projectInstances = null;
-	protected InstanceStruct currentInstance = null;
-	protected CredentialsStruct currentCredential = null;
-	protected SessionWithToken session = null;
-	
-	protected List<OfferStruct> offers = null ;
-	protected List<DistributionStruct> distributions = null ;
-	protected List<ZoneStruct> zones = null ;
-	
 	protected SessionHandler sessionHandler;
 
+	protected SessionWithToken sessionWithToken = null;
+	
+	
+	public String getSessionId(){
+		return sessionWithToken.getSession().getId();
+	}
+	
+	public SessionWithToken getSessionWithToken(){
+		return sessionWithToken;
+	}
 	
 	public PublicCloudSessionHandler() {
 		sessionHandler = new SessionHandler();
@@ -64,7 +57,7 @@ public class PublicCloudSessionHandler {
 	public void logout() {
 		try {
 			if (isLoggin()) {
-				sessionHandler.logout(session.getSession().getId());
+				sessionHandler.logout(getSessionId());
 			}
 		} catch (OvhWsException e) {
 			log.error("xception:{}:logout:{}" ,this.getClass().toString(),
@@ -74,7 +67,7 @@ public class PublicCloudSessionHandler {
 
 	public void login(String login, String password, String language, Boolean multisession) {
 		try {
-			session = sessionHandler.login(login, password, language);
+			sessionWithToken = sessionHandler.login(login, password, language);
 		} catch (OvhWsException e) {
 			log.error("Exception:{}:login:{}" ,this.getClass().toString(),
 					 e.getMessage());
@@ -82,7 +75,7 @@ public class PublicCloudSessionHandler {
 	}
 
 	public boolean isLoggin(){
-		return session!=null?true:false;
+		return sessionWithToken!=null;
 	}
 	
 

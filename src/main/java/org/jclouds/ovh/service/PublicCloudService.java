@@ -20,9 +20,10 @@ import com.ovh.ws.cloud._public.instance.r1.structure.TaskStruct;
 import com.ovh.ws.cloud._public.instance.r1.structure.ZoneStruct;
 import com.ovh.ws.common.OvhWsException;
 import com.ovh.ws.definitions.ovhgenerictype.r2.structure.CommandStatus;
+import com.ovh.ws.jsonizer.Jsonizer;
 import com.ovh.ws.jsonizer.common.http.HttpClient;
 
-public class PublicCloudService extends PublicCloudSessionHandler {
+public class PublicCloudService  {
 
 	private final Logger log = LoggerFactory.getLogger(PublicCloudService.class);
 
@@ -34,13 +35,23 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 		}
 		return instance;
 	}
+	
+	private PublicCloudSessionHandler sessionHandler = new PublicCloudSessionHandler();
 
 	private CloudInstance cloudService = new CloudInstance();
-
-	public PublicCloudService() {
-		super();
-	}
-
+	
+	protected ProjectStruct currentProject = null;
+	protected List<InstanceStruct> projectInstances = null;
+	protected InstanceStruct currentInstance = null;
+	protected CredentialsStruct currentCredential = null;
+	
+	protected List<OfferStruct> offers = null ;
+	protected List<DistributionStruct> distributions = null ;
+	protected List<ZoneStruct> zones = null ;
+	
+	
+	
+	
 	public List<InstanceStruct> getInstances() throws OvhWsException {
 		try {
 			if (projectInstances == null)
@@ -72,6 +83,12 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 		}
 	}
 
+	private void checkSession(){
+		if (sessionHandler.getSessionWithToken() == null)
+			login();
+	}
+	
+	
 	public void initOffers() throws OvhWsException {
 		log.debug("initOffers");
 
@@ -79,7 +96,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 			return;
 
 		try {
-			offers = cloudService.getOffers(session.getSession().getId());
+			offers = cloudService.getOffers(sessionHandler.getSessionId());
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:initOffers:{}",this.getClass().toString(),
@@ -88,13 +105,13 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 		}
 	}
 
+	
 	public List<OfferStruct> getOffers() throws OvhWsException {
 		log.debug("getOffers");
 
 		try {
-			if (session == null)
-				login();
-			return cloudService.getOffers(session.getSession().getId());
+			checkSession();
+			return cloudService.getOffers(sessionHandler.getSessionId());
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:getOffers:{}" ,this.getClass().toString(),
@@ -144,9 +161,8 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 		log.debug("getDistributions");
 
 		try {
-			if (session == null)
-				login();
-			return cloudService.getDistributions(session.getSession().getId());
+			checkSession();
+			return cloudService.getDistributions(sessionHandler.getSessionId());
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:getDistributions:{}" ,this.getClass().toString(),
@@ -195,9 +211,8 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 		log.debug("getZones");
 
 		try {
-			if (session == null)
-				login();
-			return cloudService.getZones(session.getSession().getId());
+			checkSession();
+			return cloudService.getZones(sessionHandler.getSessionId());
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:getZones:" ,this.getClass().toString(),
@@ -231,32 +246,33 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 	 */
 	public void login() {
 		log.debug("login");
-		if (!isLoggin()) {
-			super.login(SessionParameters.getJcloudsLogin(), SessionParameters.getJcloudsPwd(),
+		if (!sessionHandler.isLoggin()) {
+			sessionHandler.login(SessionParameters.getJcloudsLogin(), SessionParameters.getJcloudsPwd(),
 					SessionParameters.CLOUD_LANG, SessionParameters.CLOUD_MULT);
-			HttpClient httpClient = cloudService.getHttpClient();
-			httpClient.setToken(session.getToken());
+			HttpClient httpClient = Jsonizer.createHttpClient();
+	        httpClient.setTimeout(3000);
 			httpClient.setRequestSigned(true);
-			cloudService.setHttpClient(httpClient);
+			httpClient.setToken(sessionHandler.getSessionWithToken().getToken());
+			cloudService = new CloudInstance(httpClient);
 		}
 	}
 
 	public void logout() {
 		log.debug("logout");
-		if (isLoggin()) {
-			super.logout();
+		if (sessionHandler.isLoggin()) {
+			sessionHandler.logout();
 		}
 	}
 
 	public void setCurrentProjectNamed(String name) throws OvhWsException {
 		log.debug("setCurrentProjectNamed");
 
-		if (!isLoggin())
+		if (!sessionHandler.isLoggin())
 			login();
 
 		try {
 			List<ProjectStruct> projectList = cloudService
-					.getProjects(session.getSession().getId());
+					.getProjects(sessionHandler.getSessionId());
 			for (ProjectStruct projectStruct : projectList) {
 				if (projectStruct.getName().equalsIgnoreCase(name)) {
 					currentProject = projectStruct;
@@ -273,7 +289,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 	public void setCurrentInstances() throws OvhWsException {
 		log.debug("setCurrentInstances");
 
-		if (!isLoggin())
+		if (!sessionHandler.isLoggin())
 			login();
 		if (currentProject == null)
 			setCurrentProjectNamed(SessionParameters.getJcloudsProj());
@@ -284,7 +300,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 			if (projectInstances.size() > 0)
 				projectInstances.clear();
 
-			List<InstanceStruct> inst = cloudService.getInstances(session.getSession().getId(),
+			List<InstanceStruct> inst = cloudService.getInstances(sessionHandler.getSessionId(),
 					currentProject.getId(), currentProject.getName());
 			projectInstances.addAll(inst);
 
@@ -303,7 +319,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 		try {
 			if (currentProject == null)
 				setCurrentProjectNamed(SessionParameters.getJcloudsProj());
-			CommandStatus status = cloudService.newInstance(session.getSession().getId(),
+			CommandStatus status = cloudService.newInstance(sessionHandler.getSessionId(),
 					currentProject.getId(), currentProject.getName(), name, zoneId, "", 0l,
 					offerId, distributionId);
 			waitForCommandDone(status);
@@ -366,7 +382,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 			return;
 
 		try {
-			CommandStatus command = cloudService.deleteInstance(session.getSession().getId(),
+			CommandStatus command = cloudService.deleteInstance(sessionHandler.getSessionId(),
 					deletedInstance.getId());
 			waitForCommandDone(command);
 		}
@@ -387,7 +403,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 			if (i == null)
 				return;
 			
-			cloudService.rebootInstance(session.getSession().getId(), i.getId());
+			cloudService.rebootInstance(sessionHandler.getSessionId(), i.getId());
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:rebootInstanceNamed:{}",this.getClass().toString(),
@@ -405,7 +421,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 
 			if (i == null)
 				return;
-			cloudService.startInstance(session.getSession().getId(), i.getId());
+			cloudService.startInstance(sessionHandler.getSessionId(), i.getId());
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:startInstanceNamed:{}",this.getClass().toString(),
@@ -423,7 +439,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 
 			if (i == null)
 				return;
-			cloudService.stopInstance(session.getSession().getId(), i.getId());
+			cloudService.stopInstance(sessionHandler.getSessionId(), i.getId());
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:stopInstanceNamed:{}",this.getClass().toString(),
@@ -441,7 +457,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 		log.debug("getCrendential");
 		CredentialsStruct credential = null;
 		try {
-			credential = cloudService.getLoginInformations(session.getSession().getId(),
+			credential = cloudService.getLoginInformations(sessionHandler.getSessionId(),
 					instance.getId());
 		}
 		catch (OvhWsException e) {
@@ -459,7 +475,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 			if (i == null)
 				return null;
 			log.debug("getCrendentialOfInstanceNamed");
-			credential = cloudService.getLoginInformations(session.getSession().getId(), i.getId());
+			credential = cloudService.getLoginInformations(sessionHandler.getSessionId(), i.getId());
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:getCrendentialOfInstanceNamed:{}"
@@ -503,7 +519,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 		log.debug("setNewSshKey");
 		try {
 			String proj = SessionParameters.getJcloudsProj();
-			List<NotificationResultStruct> notifications = cloudService.newSshKey(session
+			List<NotificationResultStruct> notifications = cloudService.newSshKey(sessionHandler.getSessionWithToken()
 					.getSession().getId(), proj, name, credential);
 			Thread.sleep(THREAD_TIME_1);
 			if (!checkSshKeyStats(notifications)) {
@@ -527,7 +543,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 	public void applySshKeys() throws OvhWsException {
 		log.debug("applySshKeys");
 		try {
-			List<NotificationResultStruct> notifications = cloudService.applySshKeys(session
+			List<NotificationResultStruct> notifications = cloudService.applySshKeys(sessionHandler.getSessionWithToken()
 					.getSession().getId(), SessionParameters.getJcloudsProj());
 			if (!checkSshKeyStats(notifications)) {
 				log.info("Info:" + "sshkey was not apply to whole instances");
@@ -558,7 +574,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 	public List<SshKeyStruct> getSshKeys() throws OvhWsException{
 		List<SshKeyStruct> keys = null;
 		try {
-			keys = cloudService.getSshKeys(session.getSession().getId(),
+			keys = cloudService.getSshKeys(sessionHandler.getSessionId(),
 					SessionParameters.getJcloudsProj());
 
 		}
@@ -593,7 +609,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 		try {
 			String proj = SessionParameters.getJcloudsProj();
 //			SshKeyStruct sshkey = 
-					cloudService.deleteSshKey(session
+					cloudService.deleteSshKey(sessionHandler.getSessionWithToken()
 					.getSession().getId(), proj, sshKeyName);
 			applySshKeys();
 		}
@@ -611,7 +627,7 @@ public class PublicCloudService extends PublicCloudSessionHandler {
 		try {
 			TaskStruct task = null;
 			do {
-				task = cloudService.getTask(session.getSession().getId(), currentProject.getId(),
+				task = cloudService.getTask(sessionHandler.getSessionId(), currentProject.getId(),
 						command.getTasks().get(0).getId());
 				try {
 					if (task.getStatus() != TaskStatusEnum.DONE) {
