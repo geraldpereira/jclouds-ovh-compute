@@ -18,6 +18,7 @@
  */
 package org.jclouds.ovh;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Singleton;
@@ -42,24 +43,11 @@ import com.ovh.ws.common.OvhWsException;
 @Singleton
 public class OVHComputeClient {
 
-	private List<OfferStruct> offers = null;
-	private List<DistributionStruct> distributions = null;
-	private List<ZoneStruct> zones = null;
-
 	private final Logger log = LoggerFactory.getLogger(OVHComputeClient.class);
 
-	private PublicCloudService publicCloudService = null;
+	private PublicCloudService publicCloudService = PublicCloudService.getInstance();
 
 	public OVHComputeClient() {
-		publicCloudService = PublicCloudService.getInstance();
-		try {
-			offers = publicCloudService.getOffers() ;
-			distributions = publicCloudService.getDistributions() ;
-			zones = publicCloudService.getZones() ;
-		}
-		catch (OvhWsException e) {
-			log.error("Exception:OVHComputeClient:"+e.getMessage());
-		}
 	}
 	
 	
@@ -87,13 +75,13 @@ public class OVHComputeClient {
    }
 
    public Iterable<InstanceStruct> listServers() throws OvhWsException {
-      try {
-		return publicCloudService.getInstances();
-	}
-	catch (OvhWsException e) {
-		log.error("Exception:{}:listServers:{}", this.getClass().toString(), e.getMessage());
-		throw e;
-	}
+		try {
+			return publicCloudService.getInstances();
+		}
+		catch (OvhWsException e) {
+			log.error("Exception:{}:listServers:{}", this.getClass().toString(), e.getMessage());
+			throw e;
+		}
    }
 
    public DistributionStruct getImage(String name) {
@@ -101,7 +89,13 @@ public class OVHComputeClient {
    }
 
    public List<DistributionStruct> listImages() {
-      return distributions;
+		try {
+			return publicCloudService.getDistributions();
+		}
+		catch (OvhWsException e) {
+			log.error("Exception:{}:listImages:{}", this.getClass().toString(), e.getMessage());
+		}
+		return new ArrayList<DistributionStruct>();
    }
 
    public OfferStruct getHardware(String name) throws OvhWsException {
@@ -115,11 +109,23 @@ public class OVHComputeClient {
    }
 
    public List<OfferStruct> listHardware() {
-      return offers;
+		try {
+			return publicCloudService.getOffers();
+		}
+		catch (OvhWsException e) {
+			log.error("Exception:{}:listHardware:{}", this.getClass().toString(), e.getMessage());
+		}
+		return new ArrayList<OfferStruct>();
    }
    
    public List<ZoneStruct> listZones(){
-	   return zones;
+		try {
+			return publicCloudService.getZones();
+		}
+		catch (OvhWsException e) {
+			log.error("Exception:{}:listZones:{}", this.getClass().toString(), e.getMessage());
+		}
+		return new ArrayList<ZoneStruct>();
    }
 
    public void destroyServer(String name) throws OvhWsException {

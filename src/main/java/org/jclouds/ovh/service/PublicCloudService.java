@@ -44,12 +44,7 @@ public class PublicCloudService  {
 	protected List<InstanceStruct> projectInstances = null;
 	protected InstanceStruct currentInstance = null;
 	protected CredentialsStruct currentCredential = null;
-	
-	protected List<OfferStruct> offers = null ;
-	protected List<DistributionStruct> distributions = null ;
-	protected List<ZoneStruct> zones = null ;
-	
-	
+		
 	
 	
 	public List<InstanceStruct> getInstances() throws OvhWsException {
@@ -65,45 +60,11 @@ public class PublicCloudService  {
 		return projectInstances;
 	}
 
-	/**
-	 * init local variables with the current parameters of OVH
-	 * @throws OvhWsException 
-	 */
-	public void initCloudServiceParameters() throws OvhWsException {
-		log.debug("initCloudServiceParameters");
-		try {
-			initOffers();
-			initDistributions();
-			initZones();
-		}
-		catch (OvhWsException e) {
-			log.error("Exception:{}:initCloudServiceParameters:{}" ,this.getClass().toString(),
-					 e.getMessage());
-			throw e;
-		}
-	}
-
 	private void checkSession(){
 		if (sessionHandler.getSessionWithToken() == null)
 			login();
 	}
 	
-	
-	public void initOffers() throws OvhWsException {
-		log.debug("initOffers");
-
-		if (offers != null)
-			return;
-
-		try {
-			offers = cloudService.getOffers(sessionHandler.getSessionId());
-		}
-		catch (OvhWsException e) {
-			log.error("Exception:{}:initOffers:{}",this.getClass().toString(),
-					 e.getMessage());
-			throw e;
-		}
-	}
 
 	
 	public List<OfferStruct> getOffers() throws OvhWsException {
@@ -124,37 +85,20 @@ public class PublicCloudService  {
 		log.debug("getOfferNamed");
 
 		try {
-			if (offers == null)
-				initOffers();
+			List<OfferStruct> offers = getOffers();
+			for (OfferStruct offer : offers) {
+				if (offer.getName().equalsIgnoreCase(name)) {
+					return offer;
+				}
+			}
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:getOfferNamed:{}" ,this.getClass().toString(),
 					 e.getMessage());
 			throw e;
 		}
-
-		for (OfferStruct offer : offers) {
-			if (offer.getName().equalsIgnoreCase(name)) {
-				return offer;
-			}
-		}
 		return null;
-	}
 
-	public void initDistributions() throws OvhWsException {
-		log.debug("initDistributions");
-
-		if (distributions != null)
-			return;
-
-		try {
-			distributions = getDistributions();
-		}
-		catch (OvhWsException e) {
-			log.error("Exception:{}:initDistributions:{}",this.getClass().toString(),
-					 e.getMessage());
-			throw e;
-		}
 	}
 
 	public List<DistributionStruct> getDistributions() throws OvhWsException {
@@ -175,37 +119,22 @@ public class PublicCloudService  {
 		log.debug("getDistributionNamed");
 
 		try {
-			if (distributions == null)
-				initDistributions();
+			List<DistributionStruct> distributions = getDistributions();
+			for (DistributionStruct distib : distributions) {
+				if (distib.getName().equalsIgnoreCase(name)) {
+					return distib;
+				}
+			}
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:getDistributionNamed:{}",this.getClass().toString(),
 					 e.getMessage());
 		}
 
-		for (DistributionStruct distib : distributions) {
-			if (distib.getName().equalsIgnoreCase(name)) {
-				return distib;
-			}
-		}
 		return null;
+		
 	}
 
-	public void initZones() throws OvhWsException {
-		log.debug("initZones");
-
-		if (zones != null)
-			return;
-
-		try {
-			zones = getZones();
-		}
-		catch (OvhWsException e) {
-			log.error("Exception:{}:initZones:{}" ,this.getClass().toString(),
-					 e.getMessage());
-			throw e;
-		}
-	}
 
 	public List<ZoneStruct> getZones() throws OvhWsException {
 		log.debug("getZones");
@@ -225,22 +154,22 @@ public class PublicCloudService  {
 		log.debug("getZoneNamed");
 
 		try {
-			if (zones == null)
-				initZones();
+			List<ZoneStruct> zones = getZones();
+			for (ZoneStruct zone : zones) {
+				if (zone.getName().equalsIgnoreCase(name)) {
+					return zone;
+				}
+			}
 		}
 		catch (OvhWsException e) {
 			log.error("Exception:{}:getZoneNamed:" ,this.getClass().toString(),
 					 e.getMessage());
 		}
 
-		for (ZoneStruct zone : zones) {
-			if (zone.getName().equalsIgnoreCase(name)) {
-				return zone;
-			}
-		}
 		return null;
 	}
 
+	
 	/**
 	 * login methods
 	 */
@@ -336,12 +265,10 @@ public class PublicCloudService  {
 		log.debug("newInstanceNamed");
 
 		try {
-			if (zones == null)
-				initZones();
-			if (offers == null)
-				initOffers();
-			if (distributions == null)
-				initDistributions();
+			List<ZoneStruct> zones = getZones();
+			List<OfferStruct> offers = getOffers();
+			List<DistributionStruct> distributions = getDistributions();
+			
 			newInstance(zones.get(0).getName(), name, offers.get(0).getName(), distributions.get(0)
 					.getName());
 		}
