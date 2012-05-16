@@ -38,7 +38,6 @@ import com.ovh.ws.cloud._public.instance.r1.structure.DistributionStruct;
 import com.ovh.ws.cloud._public.instance.r1.structure.InstanceStruct;
 import com.ovh.ws.cloud._public.instance.r1.structure.OfferStruct;
 import com.ovh.ws.cloud._public.instance.r1.structure.ZoneStruct;
-import com.ovh.ws.common.OvhWsException;
 
 /**
  * defines the connection between the {@link OVHComputeClient} implementation
@@ -72,7 +71,7 @@ public class OVHComputeServiceAdapter implements
 					LoginCredentials.builder().user(cred.getLogin()).password(cred.getPassword())
 							.build());
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:listNodes:{}", this.getClass().toString(), e.getMessage());
 		}
 		return nodeCred;
@@ -94,7 +93,7 @@ public class OVHComputeServiceAdapter implements
 		try {
 			nodes = client.listServers();
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:listNodes:{}", this.getClass().toString(), e.getMessage());
 		}
 		return nodes;
@@ -115,7 +114,7 @@ public class OVHComputeServiceAdapter implements
 		try {
 			client.destroyServer(id);
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:destroyServer:{}", this.getClass().toString(), e.getMessage());
 		}
 	}
@@ -125,7 +124,7 @@ public class OVHComputeServiceAdapter implements
 		try {
 			client.rebootServer(id);
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:destroyServer:{}", this.getClass().toString(), e.getMessage());
 		}
 	}
@@ -135,7 +134,7 @@ public class OVHComputeServiceAdapter implements
 		try {
 			client.startServer(id);
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:resumeNode:{}", this.getClass().toString(), e.getMessage());
 		}
 
@@ -146,7 +145,7 @@ public class OVHComputeServiceAdapter implements
 		try {
 			client.stopServer(id);
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:suspendNode:{}", this.getClass().toString(), e.getMessage());
 		}
 	}

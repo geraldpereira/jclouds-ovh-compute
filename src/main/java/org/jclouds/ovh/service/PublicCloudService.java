@@ -7,6 +7,8 @@ import org.jclouds.ovh.parameters.SessionParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.ovh.ws.cloud._public.instance.r1.CloudInstance;
 import com.ovh.ws.cloud._public.instance.r1.structure.CredentialsStruct;
 import com.ovh.ws.cloud._public.instance.r1.structure.DistributionStruct;
@@ -47,12 +49,12 @@ public class PublicCloudService  {
 		
 	
 	
-	public List<InstanceStruct> getInstances() throws OvhWsException {
+	public List<InstanceStruct> getInstances() throws Exception {
 		try {
 			if (projectInstances == null)
 				this.setCurrentInstances();
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:getInstances:" ,this.getClass().toString(),
 					 e.getMessage());
 			throw e;
@@ -81,24 +83,24 @@ public class PublicCloudService  {
 		}
 	}
 
-	public OfferStruct getOfferNamed(String name) throws OvhWsException {
+	
+	public OfferStruct getOfferNamed(final String name) {
 		log.debug("getOfferNamed");
 
 		try {
-			List<OfferStruct> offers = getOffers();
-			for (OfferStruct offer : offers) {
-				if (offer.getName().equalsIgnoreCase(name)) {
-					return offer;
-				}
-			}
+			return Iterables.find(getOffers(), new Predicate<OfferStruct>() {
+		         @Override
+		         public boolean apply(OfferStruct offer) {
+		            return offer.getName().equalsIgnoreCase(name);
+		         }
+		      });
+			
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:getOfferNamed:{}" ,this.getClass().toString(),
 					 e.getMessage());
-			throw e;
 		}
 		return null;
-
 	}
 
 	public List<DistributionStruct> getDistributions() throws OvhWsException {
@@ -115,24 +117,23 @@ public class PublicCloudService  {
 		}
 	}
 
-	public DistributionStruct getDistributionNamed(String name) {
+	public DistributionStruct getDistributionNamed(final String name) {
 		log.debug("getDistributionNamed");
 
 		try {
-			List<DistributionStruct> distributions = getDistributions();
-			for (DistributionStruct distib : distributions) {
-				if (distib.getName().equalsIgnoreCase(name)) {
-					return distib;
+			return Iterables.find(getDistributions(), new Predicate<DistributionStruct>() {
+
+				@Override
+				public boolean apply(DistributionStruct input) {
+					return input.getName().equalsIgnoreCase(name);
 				}
-			}
+			});
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:getDistributionNamed:{}",this.getClass().toString(),
 					 e.getMessage());
-		}
-
+		}	
 		return null;
-		
 	}
 
 
@@ -150,23 +151,24 @@ public class PublicCloudService  {
 		}
 	}
 
-	public ZoneStruct getZoneNamed(String name) {
+	public ZoneStruct getZoneNamed(final String name) {
 		log.debug("getZoneNamed");
 
 		try {
-			List<ZoneStruct> zones = getZones();
-			for (ZoneStruct zone : zones) {
-				if (zone.getName().equalsIgnoreCase(name)) {
-					return zone;
+			return Iterables.find(getZones(), new Predicate<ZoneStruct>() {
+
+				@Override
+				public boolean apply(ZoneStruct input) {
+					return input.getName().equalsIgnoreCase(name);
 				}
-			}
+			});
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:getZoneNamed:" ,this.getClass().toString(),
 					 e.getMessage());
 		}
-
 		return null;
+
 	}
 
 	
@@ -193,37 +195,38 @@ public class PublicCloudService  {
 		}
 	}
 
-	public void setCurrentProjectNamed(String name) throws OvhWsException {
+	public void setCurrentProjectNamed(final String name) throws Exception {
 		log.debug("setCurrentProjectNamed");
 
 		if (!sessionHandler.isLoggin())
 			login();
 
 		try {
-			List<ProjectStruct> projectList = cloudService
-					.getProjects(sessionHandler.getSessionId());
-			for (ProjectStruct projectStruct : projectList) {
-				if (projectStruct.getName().equalsIgnoreCase(name)) {
-					currentProject = projectStruct;
-				}
-			}
+			currentProject = Iterables.find(cloudService
+					.getProjects(sessionHandler.getSessionId()), new Predicate<ProjectStruct>() {
+
+						@Override
+						public boolean apply(ProjectStruct input) {
+							return input.getName().equalsIgnoreCase(name);
+						}
+					});
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:setCurrentProjectNamed:{}",this.getClass().toString(),
 					 e.getMessage());
-			throw e;
 		}
 	}
 
-	public void setCurrentInstances() throws OvhWsException {
+	public void setCurrentInstances() throws Exception {
 		log.debug("setCurrentInstances");
 
 		if (!sessionHandler.isLoggin())
 			login();
-		if (currentProject == null)
-			setCurrentProjectNamed(SessionParameters.getJcloudsProj());
 
 		try {
+			if (currentProject == null)
+				setCurrentProjectNamed(SessionParameters.getJcloudsProj());
+
 			if (projectInstances == null)
 				projectInstances = new ArrayList<InstanceStruct>();
 			if (projectInstances.size() > 0)
@@ -234,7 +237,7 @@ public class PublicCloudService  {
 			projectInstances.addAll(inst);
 
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:setCurrentInstances:{}",this.getClass().toString(),
 					 e.getMessage());
 			throw e;
@@ -242,7 +245,7 @@ public class PublicCloudService  {
 	}
 
 	public void newInstance(String zoneId, String name, String offerId, String distributionId)
-			throws OvhWsException {
+			throws Exception {
 		log.debug("newInstance");
 
 		try {
@@ -254,14 +257,14 @@ public class PublicCloudService  {
 			waitForCommandDone(status);
 			setCurrentInstances();
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:newInstance:{}" ,this.getClass().toString(),
 					 e.getMessage());
 			throw e;
 		}
 	}
 
-	public void newInstanceNamed(String name) throws OvhWsException {
+	public void newInstanceNamed(String name) throws Exception {
 		log.debug("newInstanceNamed");
 
 		try {
@@ -272,34 +275,36 @@ public class PublicCloudService  {
 			newInstance(zones.get(0).getName(), name, offers.get(0).getName(), distributions.get(0)
 					.getName());
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:newInstanceNamed:{}",this.getClass().toString(),
 					 e.getMessage());
 			throw e;
 		}
 	}
 
-	public InstanceStruct getInstanceNamed(String name) {
+	public InstanceStruct getInstanceNamed(final String name) {
 
 		try {
 			// if (projectInstances == null)
 			setCurrentInstances(); // refresh all node with stats
 
 			log.debug("getInstanceNamed");
-			for (InstanceStruct instanceStruct : projectInstances) {
-				if (instanceStruct.getName().equalsIgnoreCase(name)) {
-					return instanceStruct;
+			return Iterables.find(projectInstances, new Predicate<InstanceStruct>() {
+
+				@Override
+				public boolean apply(InstanceStruct input) {
+					return input.getName().equalsIgnoreCase(name);
 				}
-			}
+			});
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:getInstanceNamed:{}",this.getClass().toString(),
 					 e.getMessage());
 		}
 		return null;
 	}
 
-	public void deleteInstanceNamed(String name) throws OvhWsException {
+	public void deleteInstanceNamed(String name) throws Exception {
 		log.debug("deleteInstanceNamed");
 
 		setCurrentInstances();
@@ -313,14 +318,14 @@ public class PublicCloudService  {
 					deletedInstance.getId());
 			waitForCommandDone(command);
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:deleteInstanceNamed:{}",this.getClass().toString(),
 					 e.getMessage());
 			throw e;
 		}
 	}
 
-	public void rebootInstanceNamed(String name) throws OvhWsException {
+	public void rebootInstanceNamed(String name) throws Exception {
 		log.debug("rebootInstanceNamed:" + name);
 
 		try {
@@ -332,14 +337,14 @@ public class PublicCloudService  {
 			
 			cloudService.rebootInstance(sessionHandler.getSessionId(), i.getId());
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:rebootInstanceNamed:{}",this.getClass().toString(),
 					 e.getMessage());
 			throw e;
 		}
 	}
 
-	public void startInstanceNamed(String name) throws OvhWsException {
+	public void startInstanceNamed(String name) throws Exception {
 		log.debug("startInstanceNamed");
 
 		try {
@@ -350,14 +355,14 @@ public class PublicCloudService  {
 				return;
 			cloudService.startInstance(sessionHandler.getSessionId(), i.getId());
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:startInstanceNamed:{}",this.getClass().toString(),
 					 e.getMessage());
 			throw e;
 		}
 	}
 
-	public void stopInstanceNamed(String name) throws OvhWsException {
+	public void stopInstanceNamed(String name) throws Exception {
 		log.debug("stopInstanceNamed");
 
 		try {
@@ -368,7 +373,7 @@ public class PublicCloudService  {
 				return;
 			cloudService.stopInstance(sessionHandler.getSessionId(), i.getId());
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:stopInstanceNamed:{}",this.getClass().toString(),
 					 e.getMessage());
 			throw e;

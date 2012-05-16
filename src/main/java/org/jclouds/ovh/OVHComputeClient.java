@@ -32,7 +32,6 @@ import com.ovh.ws.cloud._public.instance.r1.structure.DistributionStruct;
 import com.ovh.ws.cloud._public.instance.r1.structure.InstanceStruct;
 import com.ovh.ws.cloud._public.instance.r1.structure.OfferStruct;
 import com.ovh.ws.cloud._public.instance.r1.structure.ZoneStruct;
-import com.ovh.ws.common.OvhWsException;
 
 /**
  * This would be replaced with the real connection to the service that can
@@ -64,7 +63,7 @@ public class OVHComputeClient {
 		try {
 			publicCloudService.newInstance(datacenter, name, hardwareId, imageId );
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:createServerInDC:" + e.getMessage());
 		}
       return publicCloudService.getInstanceNamed(name);
@@ -74,11 +73,11 @@ public class OVHComputeClient {
 	    return publicCloudService.getInstanceNamed(name);
    }
 
-   public Iterable<InstanceStruct> listServers() throws OvhWsException {
+   public Iterable<InstanceStruct> listServers() throws Exception {
 		try {
 			return publicCloudService.getInstances();
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:listServers:{}", this.getClass().toString(), e.getMessage());
 			throw e;
 		}
@@ -92,17 +91,17 @@ public class OVHComputeClient {
 		try {
 			return publicCloudService.getDistributions();
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:listImages:{}", this.getClass().toString(), e.getMessage());
 		}
 		return new ArrayList<DistributionStruct>();
    }
 
-   public OfferStruct getHardware(String name) throws OvhWsException {
+   public OfferStruct getHardware(String name) throws Exception {
 	      try {
 			return publicCloudService.getOfferNamed(name);
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:getHardware:{}", this.getClass().toString(), e.getMessage());
 			throw e;
 		}
@@ -112,7 +111,7 @@ public class OVHComputeClient {
 		try {
 			return publicCloudService.getOffers();
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:listHardware:{}", this.getClass().toString(), e.getMessage());
 		}
 		return new ArrayList<OfferStruct>();
@@ -122,62 +121,62 @@ public class OVHComputeClient {
 		try {
 			return publicCloudService.getZones();
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:listZones:{}", this.getClass().toString(), e.getMessage());
 		}
 		return new ArrayList<ZoneStruct>();
    }
 
-   public void destroyServer(String name) throws OvhWsException {
+   public void destroyServer(String name) throws Exception {
 	   try {
 			publicCloudService.deleteInstanceNamed(name);
 		}
-		catch (OvhWsException e1) {
+		catch (Exception e1) {
 			log.error("Exception:{}:destroyServer:{}",this.getClass().toString(),
 					 e1.getMessage());
 			throw e1;
 		}
    }
 
-   public void rebootServer(String name) throws OvhWsException {
+   public void rebootServer(String name) throws Exception {
 		try {
 			publicCloudService.rebootInstanceNamed(name);
 		}
-		catch (OvhWsException e1) {
+		catch (Exception e1) {
 			log.error("Exception:{}:rebootServer:{}" ,this.getClass().toString(),
 					 e1.getMessage());
 			throw e1;
 		}
    }
 
-   public void stopServer(String name) throws OvhWsException {
+   public void stopServer(String name) throws Exception {
 	   try {
 			publicCloudService.stopInstanceNamed(name);
 		}
-		catch (OvhWsException e1) {
+		catch (Exception e1) {
 			log.error("Exception:{}:stopServer:{}",this.getClass().toString(),
 					 e1.getMessage());
 			throw e1;
 		}
    }
    
-   public void startServer(String name) throws OvhWsException {
+   public void startServer(String name) throws Exception {
 	   try {
 			publicCloudService.startInstanceNamed(name);
 		}
-		catch (OvhWsException e1) {
+		catch (Exception e1) {
 			log.error("Exception:{}:startServer:{}",this.getClass().toString(),
 					 e1.getMessage());
 			throw e1;
 		}
    }
    
-	public CredentialsStruct getCredential(String name) throws OvhWsException {
+	public CredentialsStruct getCredential(String name) throws Exception {
 		CredentialsStruct cred = null;
 		try {
 			cred = publicCloudService.getCrendentialOfInstanceNamed(name);
 		}
-		catch (OvhWsException e) {
+		catch (Exception e) {
 			log.error("Exception:{}:getCredential:{}", this.getClass().toString(), e.getMessage());
 			throw e;
 		}
