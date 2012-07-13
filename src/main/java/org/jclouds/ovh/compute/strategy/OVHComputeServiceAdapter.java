@@ -86,6 +86,17 @@ public class OVHComputeServiceAdapter implements
 	public List<DistributionStruct> listImages() {
 		return client.listImages();
 	}
+	
+	@Override
+	public DistributionStruct getImage(String arg0) {
+		List<DistributionStruct> image = listImages();
+		for (DistributionStruct im : image) {
+			if (im.getName().equalsIgnoreCase(arg0)) {
+				return im;
+			}
+		}
+		return null;
+	}
 
 	@Override
 	public Iterable<InstanceStruct> listNodes() {
@@ -149,4 +160,5 @@ public class OVHComputeServiceAdapter implements
 			log.error("Exception:{}:suspendNode:{}", this.getClass().toString(), e.getMessage());
 		}
 	}
+
 }

@@ -19,7 +19,6 @@
 package org.jclouds.ovh.compute.functions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.jclouds.compute.util.ComputeServiceUtils.parseGroupFromName;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +33,8 @@ import org.jclouds.compute.domain.Hardware;
 import org.jclouds.compute.domain.Image;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.NodeMetadataBuilder;
-import org.jclouds.compute.domain.NodeState;
+import org.jclouds.compute.domain.NodeMetadata.Status;
+import org.jclouds.compute.functions.GroupNamingConvention;
 import org.jclouds.domain.Credentials;
 import org.jclouds.domain.Location;
 import org.jclouds.domain.LoginCredentials;
@@ -58,12 +58,12 @@ import com.ovh.ws.common.OvhWsException;
 @Singleton
 public class OVHServerToNodeMetadata implements Function<InstanceStruct, NodeMetadata> {
 
-   public static final Map<InstanceStatusEnum, NodeState> serverStatusToNodeState = ImmutableMap
-         .<InstanceStatusEnum, NodeState> builder().put(InstanceStatusEnum.RUNNING, NodeState.RUNNING)//
-         .put(InstanceStatusEnum.PENDING, NodeState.PENDING)//
-         .put(InstanceStatusEnum.STOPPED, NodeState.SUSPENDED)//
-         .put(InstanceStatusEnum.PROVISIONNED, NodeState.TERMINATED)//
-         .put(InstanceStatusEnum.TO_DELETE, NodeState.UNRECOGNIZED)//
+   public static final Map<InstanceStatusEnum, Status> serverStatusToNodeState = ImmutableMap
+         .<InstanceStatusEnum, Status> builder().put(InstanceStatusEnum.RUNNING, Status.RUNNING)//
+         .put(InstanceStatusEnum.PENDING, Status.PENDING)//
+         .put(InstanceStatusEnum.STOPPED, Status.SUSPENDED)//
+         .put(InstanceStatusEnum.PROVISIONNED, Status.TERMINATED)//
+         .put(InstanceStatusEnum.TO_DELETE, Status.UNRECOGNIZED)//
          .build();
 
 
@@ -73,14 +73,18 @@ public class OVHServerToNodeMetadata implements Function<InstanceStruct, NodeMet
    private final FindLocationForServer findLocationForServer;
    private final FindImageForServer findImageForServer;
    private Map<String, CredentialsStruct> credentialStore = new HashMap<String, CredentialsStruct>();
+   private final GroupNamingConvention nodeNamingConvention;
 
    @Inject
    OVHServerToNodeMetadata(Map<String, Credentials> credentialStore, FindHardwareForServer findHardwareForServer,
-         FindLocationForServer findLocationForServer, FindImageForServer findImageForServer) {
-      this.findHardwareForServer = checkNotNull(findHardwareForServer, "findHardwareForServer");
-      this.findLocationForServer = checkNotNull(findLocationForServer, "findLocationForServer");
-      this.findImageForServer = checkNotNull(findImageForServer, "findImageForServer");
-      publicCloudService = PublicCloudService.getInstance();
+	         FindLocationForServer findLocationForServer, FindImageForServer findImageForServer,
+	         GroupNamingConvention.Factory namingConvention) {
+		this.nodeNamingConvention = checkNotNull(namingConvention, "namingConvention")
+				.createWithoutPrefix();
+		this.findHardwareForServer = checkNotNull(findHardwareForServer, "findHardwareForServer");
+		this.findLocationForServer = checkNotNull(findLocationForServer, "findLocationForServer");
+		this.findImageForServer = checkNotNull(findImageForServer, "findImageForServer");
+		publicCloudService = PublicCloudService.getInstance();
    }
 
    @Override
@@ -90,13 +94,13 @@ public class OVHServerToNodeMetadata implements Function<InstanceStruct, NodeMet
       builder.ids(from.getName() + "");
       builder.name(from.getName());
       builder.location(findLocationForServer.apply(from));
-      builder.group(parseGroupFromName(from.getName()));
+      builder.group(nodeNamingConvention.groupInUniqueNameOrNull(from.getName()));
       builder.imageId(from.getDistributionName() + "");
       Image image = findImageForServer.apply(from);
       if (image != null)
          builder.operatingSystem(image.getOperatingSystem());
       builder.hardware(findHardwareForServer.apply(from));
-      builder.state(serverStatusToNodeState.get(from.getStatus()));
+      builder.status(serverStatusToNodeState.get(from.getStatus()));
       builder.publicAddresses(ImmutableSet.<String> of(from.getIpv4()));
       //builder.privateAddresses(ImmutableSet.<String> of(""));
 

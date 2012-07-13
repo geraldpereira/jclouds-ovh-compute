@@ -23,11 +23,7 @@ import org.jclouds.compute.config.ComputeServiceAdapterContextModule;
 import org.jclouds.compute.domain.Hardware;
 import org.jclouds.compute.domain.Image;
 import org.jclouds.compute.domain.NodeMetadata;
-import org.jclouds.compute.domain.OsFamily;
-import org.jclouds.compute.domain.TemplateBuilder;
 import org.jclouds.domain.Location;
-//import org.jclouds.location.suppliers.OnlyLocationOrFirstZone;
-import org.jclouds.ovh.OVHComputeClient;
 import org.jclouds.ovh.compute.functions.OVHDatacenterToLocation;
 import org.jclouds.ovh.compute.functions.OVHHardwareToHardware;
 import org.jclouds.ovh.compute.functions.OVHImageToImage;
@@ -35,8 +31,6 @@ import org.jclouds.ovh.compute.functions.OVHServerToNodeMetadata;
 import org.jclouds.ovh.compute.strategy.OVHComputeServiceAdapter;
 
 import com.google.common.base.Function;
-//import com.google.common.base.Supplier;
-import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
 import com.ovh.ws.cloud._public.instance.r1.structure.DistributionStruct;
 import com.ovh.ws.cloud._public.instance.r1.structure.InstanceStruct;
@@ -48,11 +42,7 @@ import com.ovh.ws.cloud._public.instance.r1.structure.ZoneStruct;
  * @author David Krolak
  */
 public class OVHComputeServiceContextModule extends
-      ComputeServiceAdapterContextModule<OVHComputeClient, OVHComputeClient, InstanceStruct, OfferStruct, DistributionStruct, ZoneStruct> {
-
-   public OVHComputeServiceContextModule() {
-      super(OVHComputeClient.class, OVHComputeClient.class);
-   }
+	ComputeServiceAdapterContextModule<InstanceStruct, OfferStruct, DistributionStruct, ZoneStruct> {
 
    @Override
    protected void configure() {
@@ -68,13 +58,11 @@ public class OVHComputeServiceContextModule extends
       }).to(OVHHardwareToHardware.class);
       bind(new TypeLiteral<Function<ZoneStruct, Location>>() {
       }).to(OVHDatacenterToLocation.class);
-//      bind(new TypeLiteral<Supplier<Location>>() {
-//      }).to(OnlyLocationOrFirstZone.class);
       install(new LocationsFromComputeServiceAdapterModule<InstanceStruct, OfferStruct, DistributionStruct, ZoneStruct>(){});
    }
    
-	@Override
-	protected TemplateBuilder provideTemplate(Injector injector, TemplateBuilder template) {
-		return template.osFamily(OsFamily.UBUNTU);
-	}
+//	@Override
+//	protected TemplateBuilder provideTemplate(Injector injector, TemplateBuilder template) {
+//		return template.osFamily(OsFamily.UBUNTU);
+//	}
 }

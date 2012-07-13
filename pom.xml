@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.jclouds</groupId>
         <artifactId>jclouds-project</artifactId>
-        <version>1.4.0</version>
+        <version>1.5.0-beta.6</version>
     </parent>
     <groupId>org.jclouds.ovh</groupId>
     <artifactId>jclouds-ovhcompute</artifactId>
@@ -35,9 +35,9 @@
     <properties>
         <!-- when instances are hung, open a ticket and add here -->
         <jclouds.compute.blacklist-nodes>trmkrun-ccc,test.trmk-924</jclouds.compute.blacklist-nodes>
-        <test.servermanager.endpoint>https://www.ovh.com</test.servermanager.endpoint>
-        <test.servermanager.apiversion>1.0</test.servermanager.apiversion>
-        <test.servermanager.identity>LOGIN</test.servermanager.identity>
+        <test.ovh.endpoint>https://www.ovh.com</test.ovh.endpoint>
+        <test.ovh.apiversion>1.0</test.ovh.apiversion>
+        <test.ovh.identity>LOGIN</test.ovh.identity>
 		<jsonizer.version>1.2.3</jsonizer.version>
     </properties>
     
@@ -103,9 +103,9 @@
                                 </goals>
                                 <configuration>
                                     <systemPropertyVariables>
-                                        <test.servermanager.endpoint>${test.servermanager.endpoint}</test.servermanager.endpoint>
-                                        <test.servermanager.apiversion>${test.servermanager.apiversion}</test.servermanager.apiversion>
-                                        <test.servermanager.identity>${test.servermanager.identity}</test.servermanager.identity>
+                                        <test.ovh.endpoint>${test.ovh.endpoint}</test.ovh.endpoint>
+                                        <test.ovh.apiversion>${test.ovh.apiversion}</test.ovh.apiversion>
+                                        <test.ovh.identity>${test.ovh.identity}</test.ovh.identity>
                                         <jclouds.compute.blacklist-nodes>${jclouds.compute.blacklist-nodes}</jclouds.compute.blacklist-nodes>
                                     </systemPropertyVariables>
                                 </configuration>

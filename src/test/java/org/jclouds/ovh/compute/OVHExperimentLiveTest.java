@@ -18,27 +18,37 @@
  */
 package org.jclouds.ovh.compute;
 
-import java.util.List;
-import java.util.Properties;
-
-import org.jclouds.compute.StandaloneComputeServiceContextBuilder;
-import org.jclouds.ovh.OVHComputeClient;
-import org.jclouds.ovh.compute.config.OVHComputeServiceContextModule;
-
-import com.google.inject.Module;
+import org.jclouds.ContextBuilder;
+import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.compute.internal.BaseComputeServiceContextLiveTest;
+import org.jclouds.ovh.OVHApiMetadata;
+import org.testng.annotations.Test;
 
 /**
  * 
- * @author David Krolak
+ * @author Adrian Cole
  */
-public class OVHComputeServiceContextBuilder extends StandaloneComputeServiceContextBuilder<OVHComputeClient> {
+@Test(groups = "live", singleThreaded = true, testName = "OVHExperimentLiveTest")
+public class OVHExperimentLiveTest extends BaseComputeServiceContextLiveTest {
 
-   public OVHComputeServiceContextBuilder(Properties props) {
-      super(OVHComputeClient.class, props);
-   }
+	public OVHExperimentLiveTest() {
+		provider = "ovh";
+	}
 
-   @Override
-   protected void addContextModule(List<Module> modules) {
-      modules.add(new OVHComputeServiceContextModule());
-   }
+	@Test
+	public void testAndExperiment() {
+		ComputeServiceContext context = null;
+		try {
+			context = ContextBuilder.newBuilder(new OVHApiMetadata()).build(
+					ComputeServiceContext.class);
+
+			context.getComputeService().listNodes();
+
+		}
+		finally {
+			if (context != null)
+				context.close();
+		}
+	}
+
 }
