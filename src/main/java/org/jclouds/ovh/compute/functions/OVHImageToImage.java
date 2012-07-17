@@ -23,6 +23,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.jclouds.compute.domain.Image;
+import org.jclouds.compute.domain.Image.Status;
 import org.jclouds.compute.domain.ImageBuilder;
 import org.jclouds.compute.domain.OperatingSystem;
 import org.jclouds.compute.domain.OsFamily;
@@ -37,53 +38,30 @@ import com.ovh.ws.cloud._public.instance.r1.structure.DistributionStruct;
  */
 @Singleton
 public class OVHImageToImage implements Function<DistributionStruct, Image> {
-   @Resource
-   @Named(ComputeServiceConstants.COMPUTE_LOGGER)
-   protected Logger logger = Logger.NULL;
+	@Resource
+	@Named(ComputeServiceConstants.COMPUTE_LOGGER)
+	protected Logger logger = Logger.NULL;
 
-   @Override
-   public Image apply(DistributionStruct from) {
-	   
-      ImageBuilder builder = new ImageBuilder();
-            
-      builder.ids(from.getName() + "");
-      builder.name(from.getName());
-      builder.description(from.getDescription());
+	@Override
+	public Image apply(DistributionStruct from) {
 
-      OsFamily family = null;
-      
-      
-      try {
-         family = OsFamily.valueOf(from.getBase().toUpperCase());
+		ImageBuilder builder = new ImageBuilder().providerId("ovh").ids(from.getName())
+				.name(from.getName()).description(from.getDescription()).status(Status.AVAILABLE);
+		
+		OsFamily family = null;
+
+		try {
+			family = OsFamily.valueOf(from.getBase().toUpperCase());
 
 			builder.operatingSystem(new OperatingSystem.Builder().name(from.getName())
 					.description(from.getDescription()).family(family).version(null)
-					.is64Bit("64".equalsIgnoreCase(from.getPlatform()) ).arch(null).build());
-      } catch (IllegalArgumentException e) {
-         logger.debug("<< didn't match os(%s)", from);
-      }
+					.is64Bit("64".equalsIgnoreCase(from.getPlatform())).arch(null).build());
+		}
+		catch (IllegalArgumentException e) {
+			logger.debug("<< didn't match os(%s)", from);
+		}
+		
+		return builder.build();
+	}
 
-      return builder.build();
-   }
-
-   
-//   private boolean is64bit(String name){
-//	   Pattern p = Pattern.compile("[a-z0-9]*-x64[a-z0-9]*");
-//	   Matcher m = p.matcher(name);
-//	   return m.matches();
-//   }
-//   private boolean getOsVersion(String name){
-//	   Pattern p = Pattern.compile("[a-z]*[0-9]*-x64[a-z0-9]*");
-//	   Matcher m = p.matcher(name);
-//	   // Vérification des occurrences
-//	   while(m.find())
-//	   {
-//	        for(int n=1; n<=m.groupCount(); n++)
-//	        {
-//	             System.out.println(m.group(n));
-//	        }
-//	   }
-//	   return m.matches();
-//   }
-   
 }
