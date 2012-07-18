@@ -2,13 +2,21 @@ package org.jclouds.ovh.service;
 
 import java.net.URL;
 
+import org.jclouds.ovh.parameters.SessionParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ovh.ws.common.OvhWsException;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.ovh.ws.api.OvhWsException;
+import com.ovh.ws.api.auth.AuthProvider;
+import com.ovh.ws.cloud._public.instance.r1.CloudInstance;
+import com.ovh.ws.jsonizer.api.Jsonizer;
+import com.ovh.ws.jsonizer.api.http.HttpClient;
 import com.ovh.ws.sessionhandler.r3.SessionHandler;
 import com.ovh.ws.sessionhandler.r3.structure.SessionWithToken;
 
+//@Singleton
 public class PublicCloudSessionHandler {
 
 	private  final Logger log = LoggerFactory.getLogger(PublicCloudSessionHandler.class);
@@ -20,11 +28,10 @@ public class PublicCloudSessionHandler {
 		return instance;
 	}
 	
+//	@Inject
+	protected SessionHandler sessionHandler = new SessionHandler();
 	
-	
-	protected SessionHandler sessionHandler;
-
-	protected SessionWithToken sessionWithToken = null;
+	protected SessionWithToken sessionWithToken;
 	
 	
 	public String getSessionId(){
@@ -36,7 +43,6 @@ public class PublicCloudSessionHandler {
 	}
 	
 	public PublicCloudSessionHandler() {
-		sessionHandler = new SessionHandler();
 	}
 	
 	
@@ -45,32 +51,30 @@ public class PublicCloudSessionHandler {
 		sessionHandler.setUrl(url);
 	}
 	
-	public void password(final String sessionId, final String login,final String password) {
+	public void password(final String login,final String password) {
 		try {
-			sessionHandler.password(sessionId, login, password);
+			sessionHandler.password( login, password);
 		} catch (OvhWsException e) {
-			log.error("Exception:{}:password:{}" ,this.getClass().toString(),
-					 e.getMessage());
+			log.error("password:{}" ,e.getMessage());
 		}
 	}
 
 	public void logout() {
 		try {
 			if (isLoggin()) {
-				sessionHandler.logout(getSessionId());
+				sessionHandler.logout();
 			}
 		} catch (OvhWsException e) {
-			log.error("xception:{}:logout:{}" ,this.getClass().toString(),
-					 e.getMessage());
+			log.error("logout:{}" , e.getMessage());
 		}
 	}
 
-	public void login(String login, String password, String language, Boolean multisession) {
+	public void login() {
 		try {
-			sessionWithToken = sessionHandler.login(login, password, language);
+			sessionWithToken = sessionHandler.login(SessionParameters.getJcloudsLogin(),
+					SessionParameters.getJcloudsPwd(), SessionParameters.CLOUD_LANG,null);
 		} catch (OvhWsException e) {
-			log.error("Exception:{}:login:{}" ,this.getClass().toString(),
-					 e.getMessage());
+			log.error("login:{}" , e.getMessage());
 		}
 	}
 

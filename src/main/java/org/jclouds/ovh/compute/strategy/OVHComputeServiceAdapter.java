@@ -20,6 +20,7 @@ package org.jclouds.ovh.compute.strategy;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -59,43 +60,58 @@ public class OVHComputeServiceAdapter implements
 	@Override
 	public NodeAndInitialCredentials<InstanceStruct> createNodeWithGroupEncodedIntoName(String tag,
 			String name, Template template) {
-		// create the backend object using parameters from the template.
-		InstanceStruct from = client.createServerInDC(template.getLocation().getId(), name,
-				template.getImage().getName(), template.getHardware().getName());
-		// request credentials and convert it
-		CredentialsStruct cred = null;
 		NodeAndInitialCredentials<InstanceStruct> nodeCred = null;
 		try {
-			cred = client.getCredential(name);
+			// create the backend object using parameters from the template.
+			InstanceStruct from = client.createServerInDC(template.getLocation().getId(), name,
+					template.getImage().getName(), template.getHardware().getName());
+			
+			// request credentials and convert it
+			CredentialsStruct cred = client.getCredential(name);
 			nodeCred = new NodeAndInitialCredentials<InstanceStruct>(from, from.getName() + "",
 					LoginCredentials.builder().user(cred.getLogin()).password(cred.getPassword())
 							.build());
 		}
 		catch (Exception e) {
-			log.error("Exception:{}:listNodes:{}", this.getClass().toString(), e.getMessage());
+			log.error("createNodeWithGroupEncodedIntoName:{}", e.getMessage());
 		}
 		return nodeCred;
 	}
 
 	@Override
 	public List<OfferStruct> listHardwareProfiles() {
-		return client.listHardware();
+		List<OfferStruct> hw = new ArrayList<OfferStruct>();
+		try {
+			hw = client.listHardware();
+		}
+		catch (Exception e) {
+			log.error("listHardwareProfiles:{}", e.getMessage());
+		}
+		return hw;
 	}
 
 	@Override
 	public List<DistributionStruct> listImages() {
-		return client.listImages();
+		List<DistributionStruct> im = new ArrayList<DistributionStruct>();
+		try {
+			im = client.listImages();
+		}
+		catch (Exception e) {
+			log.error("listImages:{}", e.getMessage());
+		}
+		return im;
 	}
 	
 	@Override
 	public DistributionStruct getImage(String arg0) {
-		List<DistributionStruct> image = listImages();
-		for (DistributionStruct im : image) {
-			if (im.getName().equalsIgnoreCase(arg0)) {
-				return im;
-			}
+		DistributionStruct d = null;
+		try {
+			d = client.getImage(arg0);
 		}
-		return null;
+		catch (Exception e) {
+			log.error("getImage:{}", e.getMessage());
+		}
+		return d;
 	}
 
 	@Override
@@ -105,19 +121,33 @@ public class OVHComputeServiceAdapter implements
 			nodes = client.listServers();
 		}
 		catch (Exception e) {
-			log.error("Exception:{}:listNodes:{}", this.getClass().toString(), e.getMessage());
+			log.error("listNodes:{}", e.getMessage());
 		}
 		return nodes;
 	}
 
 	@Override
 	public Iterable<ZoneStruct> listLocations() {
-		return client.listZones();
+		Iterable<ZoneStruct> z = null;
+		try {
+			z =  client.listZones();
+		}
+		catch (Exception e) {
+			log.error("listLocations:{}", e.getMessage());
+		}
+		return z;
 	}
 
 	@Override
 	public InstanceStruct getNode(String id) {
-		return client.getServer(id);
+		InstanceStruct i = null;
+		try {
+			i = client.getServer(id);
+		}
+		catch (Exception e) {
+			log.error("getNode:{}", e.getMessage());
+		}
+		return i;
 	}
 
 	@Override
@@ -126,7 +156,7 @@ public class OVHComputeServiceAdapter implements
 			client.destroyServer(id);
 		}
 		catch (Exception e) {
-			log.error("Exception:{}:destroyServer:{}", this.getClass().toString(), e.getMessage());
+			log.error("destroyServer:{}", e.getMessage());
 		}
 	}
 
@@ -136,7 +166,7 @@ public class OVHComputeServiceAdapter implements
 			client.rebootServer(id);
 		}
 		catch (Exception e) {
-			log.error("Exception:{}:destroyServer:{}", this.getClass().toString(), e.getMessage());
+			log.error("destroyServer:{}", e.getMessage());
 		}
 	}
 
@@ -146,7 +176,7 @@ public class OVHComputeServiceAdapter implements
 			client.startServer(id);
 		}
 		catch (Exception e) {
-			log.error("Exception:{}:resumeNode:{}", this.getClass().toString(), e.getMessage());
+			log.error("resumeNode:{}", e.getMessage());
 		}
 
 	}
@@ -157,7 +187,7 @@ public class OVHComputeServiceAdapter implements
 			client.stopServer(id);
 		}
 		catch (Exception e) {
-			log.error("Exception:{}:suspendNode:{}", this.getClass().toString(), e.getMessage());
+			log.error("suspendNode:{}", e.getMessage());
 		}
 	}
 

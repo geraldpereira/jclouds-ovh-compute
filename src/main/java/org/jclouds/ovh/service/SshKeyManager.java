@@ -6,11 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import org.jclouds.ovh.parameters.SessionParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ovh.ws.api.OvhWsException;
+import com.ovh.ws.api.auth.AuthProvider;
+import com.ovh.ws.cloud._public.instance.r1.CloudInstance;
+import com.ovh.ws.cloud._public.instance.r1.structure.NotificationResultStruct;
 import com.ovh.ws.cloud._public.instance.r1.structure.SshKeyStruct;
-import com.ovh.ws.common.OvhWsException;
+import com.ovh.ws.jsonizer.api.Jsonizer;
+import com.ovh.ws.jsonizer.api.http.HttpClient;
 
 public class SshKeyManager {
 
@@ -19,8 +25,12 @@ public class SshKeyManager {
 	private static SshKeyManager instance;
 	
 	private List<SshKeyStruct> keys = new ArrayList<SshKeyStruct>();
+
+//	@Inject
+//	private PublicCloudSessionHandler sessionHandler;
+	private PublicCloudSessionHandler sessionHandler = PublicCloudSessionHandler.getInstance();
 	
-	private PublicCloudService publicCloudService = PublicCloudService.getInstance();
+	private CloudInstance cloudService;
 	
 	public static SshKeyManager getInstance(){
 		if (instance == null) {
@@ -28,6 +38,27 @@ public class SshKeyManager {
 		}
 		return instance;
 	}
+	
+	public SshKeyManager(){
+		cloudService = getCloudInstance();
+	}
+	
+	private CloudInstance getCloudInstance(){
+		   HttpClient httpClient = Jsonizer.createHttpClient();
+			httpClient.setTimeout(3000);
+			return new CloudInstance(httpClient, new AuthProvider() {
+
+				@Override
+				public String getToken() {
+					return sessionHandler.getSessionWithToken().getToken();
+				}
+
+				@Override
+				public String getSessionId() {
+					return sessionHandler.getSessionId();
+				}
+			});
+	   }
 	
 	public void getLocalPublicKeys(){
 		keys.clear();
@@ -58,7 +89,7 @@ public class SshKeyManager {
 		List<SshKeyStruct> keys;
 		try {
 			System.out.println("project ssh keys:");
-			keys = publicCloudService.getSshKeys();
+			keys = cloudService.getSshKeys(SessionParameters.getJcloudsProj());
 			for (SshKeyStruct sshKeyStruct : keys) {
 				System.out.println(sshKeyStruct.getName());
 			}
@@ -111,29 +142,70 @@ public class SshKeyManager {
 		}
 	}
 	
-	public void installFromLocalSshKeys(String name, String alias)throws OvhWsException, InterruptedException{
+	public void applySshKeys() {
+		log.debug("applySshKeys");
+		try {
+			List<NotificationResultStruct> notifications = cloudService.applySshKeys( SessionParameters.getJcloudsProj());
+			if (!checkSshKeyStats(notifications)) {
+				log.info("Info:" + "sshkey was not apply to whole instances");
+				Thread.sleep(5000);
+				applySshKeys();
+			}
+		}
+		catch (OvhWsException e) {
+			log.error("Exception:{}:applySshKeys:{}" ,this.getClass().toString(),
+					 e.getMessage());
+		}
+		catch (InterruptedException e) {
+			log.error("Exception:{}:setNewSshKey:{}" ,this.getClass().toString(),
+					 e.getMessage());
+		}
+	}
+	
+	public boolean checkSshKeyStats(List<NotificationResultStruct> notifications) {
+		for (NotificationResultStruct notificationResultStruct : notifications) {
+			if (!notificationResultStruct.getStatus().equalsIgnoreCase("OK")) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static int THREAD_TIME_1 = 1000;
+	private static int THREAD_TIME_5 = 1000;
+	public void installFromLocalSshKeys(String name, String alias){
 		getLocalPublicKeys();
 		try {
 		for (SshKeyStruct sshKeyStruct : keys) {
 			if (name.equalsIgnoreCase(sshKeyStruct.getName())) {
-					publicCloudService.setNewSshKey(alias, "ssh-rsa " + sshKeyStruct.getKey() + " " + sshKeyStruct.getName());
+					List<NotificationResultStruct> notifications = cloudService.newSshKey( SessionParameters.getJcloudsProj(), alias, "ssh-rsa " + sshKeyStruct.getKey() + " " + sshKeyStruct.getName());
+					Thread.sleep(THREAD_TIME_1);
+					if (!checkSshKeyStats(notifications)) {
+						log.info("Info:" + "sshkey was not apply to whole instances");
+						Thread.sleep(THREAD_TIME_5);
+						applySshKeys();
+					}
 				}
 				
 			}
 		}catch (OvhWsException e) {
 			log.error("Exception:{}:installFromLocalSshKeys:{}" ,this.getClass().toString(),
 					 e.getMessage());
-			throw e;
+		}
+		catch (InterruptedException e) {
+			log.error("Exception:{}:installFromLocalSshKeys:{}" ,this.getClass().toString(),
+					 e.getMessage());
 		}
 	}
 	
-	public void removeSshKey(String keyName)throws OvhWsException{
+	public void removeSshKey(String keyName){
 		try {
-			publicCloudService.removeSshKey(keyName);
+			String proj = SessionParameters.getJcloudsProj();
+			cloudService.deleteSshKey(proj, keyName);
+			applySshKeys();
 		}catch (OvhWsException e) {
 			log.error("Exception:{}:removeSshKey:{}" ,this.getClass().toString(),
 					 e.getMessage());
-			throw e;
 		}
 	}
 }

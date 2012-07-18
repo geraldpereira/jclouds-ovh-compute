@@ -38,14 +38,29 @@
         <test.ovh.endpoint>https://www.ovh.com</test.ovh.endpoint>
         <test.ovh.apiversion>1.0</test.ovh.apiversion>
         <test.ovh.identity>LOGIN</test.ovh.identity>
-		<jsonizer.version>1.2.3</jsonizer.version>
+		<jsonizer.version>2.0.0</jsonizer.version>
+      <jclouds.osgi.export>org.jclouds.ovh*;version="${project.version}"</jclouds.osgi.export>
+      <jclouds.osgi.import>org.jclouds*;version="${project.version}",*</jclouds.osgi.import>
     </properties>
+    
+    
     
     <dependencies>
     	<dependency>
 			<groupId>com.ovh.ws</groupId>
-			<artifactId>jsonizer-common-java</artifactId>
+			<artifactId>jsonizer-http-jersey</artifactId>
 			<version>${jsonizer.version}</version>
+			<exclusions>
+	            <exclusion>
+					<groupId>com.sun.jersey</groupId>
+					<artifactId>jersey-client</artifactId>
+	            </exclusion>
+            </exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.12</version>
 		</dependency>
         <dependency>
             <groupId>org.jclouds</groupId>
@@ -84,6 +99,7 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        
     </dependencies>
 
     <profiles>
@@ -147,7 +163,7 @@
 						<param>http://ws.ovh.com/cloud/public/instance/r1/schema.json</param>
 					</schemaUrls>
 
-					<targetFramework>java</targetFramework>
+					<useInjection>false</useInjection>
 				</configuration>
 			</plugin>
         </plugins>
