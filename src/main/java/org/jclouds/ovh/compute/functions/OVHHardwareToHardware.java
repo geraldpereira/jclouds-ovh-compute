@@ -28,7 +28,7 @@ import org.jclouds.compute.domain.internal.VolumeImpl;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.ovh.ws.cloud._public.instance.r1.structure.OfferStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.OfferStruct;
 
 /**
  * @author David Krolak

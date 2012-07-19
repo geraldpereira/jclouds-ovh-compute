@@ -6,13 +6,7 @@ import org.jclouds.ovh.parameters.SessionParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.ovh.ws.api.OvhWsException;
-import com.ovh.ws.api.auth.AuthProvider;
-import com.ovh.ws.cloud._public.instance.r1.CloudInstance;
-import com.ovh.ws.jsonizer.api.Jsonizer;
-import com.ovh.ws.jsonizer.api.http.HttpClient;
 import com.ovh.ws.sessionhandler.r3.SessionHandler;
 import com.ovh.ws.sessionhandler.r3.structure.SessionWithToken;
 

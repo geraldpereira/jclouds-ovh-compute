@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import com.ovh.ws.api.OvhWsException;
 import com.ovh.ws.api.auth.AuthProvider;
-import com.ovh.ws.cloud._public.instance.r1.CloudInstance;
-import com.ovh.ws.cloud._public.instance.r1.structure.NotificationResultStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.SshKeyStruct;
+import com.ovh.ws.cloud._public.instance.r3.CloudInstance;
+import com.ovh.ws.cloud._public.instance.r3.structure.NotificationResultStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.SshKeyStruct;
 import com.ovh.ws.jsonizer.api.Jsonizer;
 import com.ovh.ws.jsonizer.api.http.HttpClient;
 

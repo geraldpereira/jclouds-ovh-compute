@@ -31,7 +31,7 @@ import org.jclouds.compute.reference.ComputeServiceConstants;
 import org.jclouds.logging.Logger;
 
 import com.google.common.base.Function;
-import com.ovh.ws.cloud._public.instance.r1.structure.DistributionStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.DistributionStruct;
 
 /**
  * @author David Krolak

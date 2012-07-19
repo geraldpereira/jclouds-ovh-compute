@@ -29,18 +29,16 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.inject.Inject;
 import com.ovh.ws.api.OvhWsException;
-import com.ovh.ws.api.auth.AuthProvider;
-import com.ovh.ws.cloud._public.instance.r1.CloudInstance;
-import com.ovh.ws.cloud._public.instance.r1.structure.CredentialsStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.DistributionStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.InstanceStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.OfferStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.ProjectStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.TaskStatusEnum;
-import com.ovh.ws.cloud._public.instance.r1.structure.TaskStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.ZoneStruct;
+import com.ovh.ws.cloud._public.instance.r3.CloudInstance;
+import com.ovh.ws.cloud._public.instance.r3.structure.CredentialsStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.DistributionStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.InstanceStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.OfferStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.ProjectStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.TaskStatusEnum;
+import com.ovh.ws.cloud._public.instance.r3.structure.TaskStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.ZoneStruct;
 import com.ovh.ws.definitions.ovhgenerictype.r2.structure.CommandStatus;
 import com.ovh.ws.jsonizer.api.Jsonizer;
 import com.ovh.ws.jsonizer.api.http.HttpClient;
@@ -56,16 +54,15 @@ public class OVHComputeClient {
 
 	private final Logger log = LoggerFactory.getLogger(OVHComputeClient.class);
 
-//	@Inject
-//	private PublicCloudSessionHandler sessionHandler;
+	// @Inject
+	// private PublicCloudSessionHandler sessionHandler;
 	private PublicCloudSessionHandler sessionHandler = PublicCloudSessionHandler.getInstance();
 
-//	@Inject
-//	private CloudInstance cloudService;
+	// @Inject
+	// private CloudInstance cloudService;
 	private CloudInstance cloudService = null;
 
 	protected ProjectStruct currentProject = null;
-
 
 	private void checkSession() {
 		if (sessionHandler.getSessionWithToken() == null)
@@ -84,14 +81,14 @@ public class OVHComputeClient {
 			}
 		}
 	}
-	
-	 private CloudInstance getCloudInstance(){
-		   HttpClient httpClient = Jsonizer.createHttpClient();
-			httpClient.setTimeout(3000);
-			return new CloudInstance(httpClient,sessionHandler.getSessionWithToken());
-	   }
 
-	private void setCurrentProjectNamed(final String name) throws Exception {
+	private CloudInstance getCloudInstance() {
+		HttpClient httpClient = Jsonizer.createHttpClient();
+		httpClient.setTimeout(3000);
+		return new CloudInstance(httpClient, sessionHandler.getSessionWithToken());
+	}
+
+	private void setCurrentProjectNamed(final String name) throws OvhWsException {
 		log.debug("setCurrentProjectNamed");
 
 		if (!sessionHandler.isLoggin())
@@ -114,7 +111,8 @@ public class OVHComputeClient {
 
 		TaskStruct task = null;
 		do {
-			task = cloudService.getTask(currentProject.getId(), command.getTasks().get(0).getId());
+			task = cloudService
+					.getTask(currentProject.getName(), command.getTasks().get(0).getId());
 			try {
 				if (task.getStatus() != TaskStatusEnum.DONE) {
 					Thread.currentThread();
@@ -127,7 +125,6 @@ public class OVHComputeClient {
 
 	}
 
-
 	/**
 	 * simulate creating a server, as this is really going to happen with the
 	 * api underneath
@@ -139,23 +136,23 @@ public class OVHComputeClient {
 	 * @return new server
 	 */
 	public InstanceStruct createServerInDC(String datacenter, String name, String imageId,
-			String hardwareId)  throws Exception {
+			String hardwareId) throws OvhWsException {
 		if (currentProject == null)
 			setCurrentProjectNamed(SessionParameters.getJcloudsProj());
-		CommandStatus status = cloudService.newInstance(currentProject.getId(),
-				currentProject.getName(), name, datacenter, "", 0l, hardwareId, imageId);
+		CommandStatus status = cloudService.newInstance(currentProject.getName(), name, datacenter,
+				"", Long.valueOf(0l), hardwareId, imageId);
 		waitForCommandDone(status);
 		return getServer(name);
 	}
 
-	public Iterable<InstanceStruct> listServers() throws Exception {
+	public Iterable<InstanceStruct> listServers() throws OvhWsException {
 		checkSession();
 		if (currentProject == null)
 			setCurrentProjectNamed(SessionParameters.getJcloudsProj());
-		return cloudService.getInstances(currentProject.getId(), currentProject.getName());
+		return cloudService.getInstances(currentProject.getName());
 	}
-	
-	public InstanceStruct getServer(final String name) throws Exception {
+
+	public InstanceStruct getServer(final String name) throws OvhWsException {
 		return Iterables.find(listServers(), new Predicate<InstanceStruct>() {
 
 			@Override
@@ -165,12 +162,12 @@ public class OVHComputeClient {
 		});
 	}
 
-	public List<DistributionStruct> listImages() throws Exception {
+	public List<DistributionStruct> listImages() throws OvhWsException {
 		checkSession();
 		return cloudService.getDistributions();
 	}
-	
-	public DistributionStruct getImage(final String name) throws Exception {
+
+	public DistributionStruct getImage(final String name) throws OvhWsException {
 		listServers();
 		return Iterables.find(listImages(), new Predicate<DistributionStruct>() {
 
@@ -181,12 +178,12 @@ public class OVHComputeClient {
 		});
 	}
 
-	public List<OfferStruct> listHardware() throws Exception {
+	public List<OfferStruct> listHardware() throws OvhWsException {
 		checkSession();
 		return cloudService.getOffers();
 	}
-	
-	public OfferStruct getHardware(final String name) throws Exception {
+
+	public OfferStruct getHardware(final String name) throws OvhWsException {
 		return Iterables.find(listHardware(), new Predicate<OfferStruct>() {
 			@Override
 			public boolean apply(OfferStruct offer) {
@@ -195,29 +192,29 @@ public class OVHComputeClient {
 		});
 	}
 
-	public List<ZoneStruct> listZones() throws Exception {
+	public List<ZoneStruct> listZones() throws OvhWsException {
 		checkSession();
 		return cloudService.getZones();
 	}
 
-	public void destroyServer(String name) throws Exception {
+	public void destroyServer(String name) throws OvhWsException {
 		CommandStatus command = cloudService.deleteInstance(getServer(name).getId());
 		waitForCommandDone(command);
 	}
 
-	public void rebootServer(String name) throws Exception {
+	public void rebootServer(String name) throws OvhWsException {
 		cloudService.rebootInstance(getServer(name).getId());
 	}
 
-	public void stopServer(String name) throws Exception {
+	public void stopServer(String name) throws OvhWsException {
 		cloudService.stopInstance(getServer(name).getId());
 	}
 
-	public void startServer(String name) throws Exception {
-		cloudService.startInstance(getServer(name).getId());
+	public void startServer(String name) throws OvhWsException {
+		cloudService.startInstance(getServer(name).getId(), "");
 	}
 
-	public CredentialsStruct getCredential(String name) throws Exception {
-		return cloudService.getLoginInformations(getServer(name).getId());
+	public CredentialsStruct getCredential(String name) throws OvhWsException {
+			return cloudService.getLoginInformations(getServer(name).getId());
 	}
 }

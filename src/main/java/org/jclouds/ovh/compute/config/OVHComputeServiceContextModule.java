@@ -32,10 +32,10 @@ import org.jclouds.ovh.compute.strategy.OVHComputeServiceAdapter;
 
 import com.google.common.base.Function;
 import com.google.inject.TypeLiteral;
-import com.ovh.ws.cloud._public.instance.r1.structure.DistributionStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.InstanceStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.OfferStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.ZoneStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.DistributionStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.InstanceStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.OfferStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.ZoneStruct;
 
 /**
  * 

@@ -28,7 +28,7 @@ import org.jclouds.domain.LocationScope;
 
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
-import com.ovh.ws.cloud._public.instance.r1.structure.ZoneStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.ZoneStruct;
 
 /**
  * @author David Krolak

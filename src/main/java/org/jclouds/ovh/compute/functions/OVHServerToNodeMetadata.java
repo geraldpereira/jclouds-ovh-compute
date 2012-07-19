@@ -49,10 +49,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.ovh.ws.api.OvhWsException;
 import com.ovh.ws.api.auth.AuthProvider;
-import com.ovh.ws.cloud._public.instance.r1.CloudInstance;
-import com.ovh.ws.cloud._public.instance.r1.structure.CredentialsStruct;
-import com.ovh.ws.cloud._public.instance.r1.structure.InstanceStatusEnum;
-import com.ovh.ws.cloud._public.instance.r1.structure.InstanceStruct;
+import com.ovh.ws.cloud._public.instance.r3.CloudInstance;
+import com.ovh.ws.cloud._public.instance.r3.structure.CredentialsStruct;
+import com.ovh.ws.cloud._public.instance.r3.structure.InstanceStatusEnum;
+import com.ovh.ws.cloud._public.instance.r3.structure.InstanceStruct;
 import com.ovh.ws.jsonizer.api.Jsonizer;
 import com.ovh.ws.jsonizer.api.http.HttpClient;
 

@@ -160,7 +160,7 @@
 				<configuration>
 					<schemaUrls>
 						<param>http://ws.ovh.com/sessionHandler/r3/schema.json</param>
-						<param>http://ws.ovh.com/cloud/public/instance/r1/schema.json</param>
+						<param>http://ws.ovh.com/cloud/public/instance/r3/schema.json</param>
 					</schemaUrls>
 
 					<useInjection>false</useInjection>
