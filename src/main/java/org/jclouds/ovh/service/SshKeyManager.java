@@ -87,10 +87,10 @@ public class SshKeyManager {
 	
 	public void printProjectSshKeys(){
 		try {
-			System.out.println("project ssh keys:");
-			List<SshKeyStruct> keys = cloudService.getSshKeys(SessionParameters.getJcloudsProj());
+			print("project ssh keys:");
+			keys = cloudService.getSshKeys(SessionParameters.getJcloudsProj());
 			for (SshKeyStruct sshKeyStruct : keys) {
-				System.out.println(sshKeyStruct.getName());
+				print(sshKeyStruct.getName());
 			}
 		}
 		catch (OvhWsException e) {
@@ -135,9 +135,9 @@ public class SshKeyManager {
 	
 	public void printLocalSshKeys(){
 		getLocalPublicKeys();
-		System.out.println("local ssh keys:");
+		print("local ssh keys:");
 		for (SshKeyStruct sshKeyStruct : keys) {
-			System.out.println("key: " + sshKeyStruct.getName() + " " + sshKeyStruct.getKey());
+			print("key: " + sshKeyStruct.getName() + " " + sshKeyStruct.getKey());
 		}
 	}
 	
@@ -170,8 +170,8 @@ public class SshKeyManager {
 		return true;
 	}
 
-	private static int THREAD_TIME_1 = 1000;
-	private static int THREAD_TIME_5 = 1000;
+	private static final int THREAD_TIME_1 = 1000;
+	private static final int THREAD_TIME_5 = 1000;
 	public void installFromLocalSshKeys(String name, String alias){
 		getLocalPublicKeys();
 		try {
@@ -206,5 +206,9 @@ public class SshKeyManager {
 			log.error("Exception:{}:removeSshKey:{}" ,this.getClass().toString(),
 					 e.getMessage());
 		}
+	}
+	
+	private void print(String s){
+		System.out.println(s);
 	}
 }
