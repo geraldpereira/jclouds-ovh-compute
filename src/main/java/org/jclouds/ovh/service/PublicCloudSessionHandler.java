@@ -14,8 +14,8 @@ import com.ovh.ws.sessionhandler.r3.structure.SessionWithToken;
 public class PublicCloudSessionHandler {
 
 	private  final Logger log = LoggerFactory.getLogger(PublicCloudSessionHandler.class);
-	static private PublicCloudSessionHandler instance=null;
-	static public PublicCloudSessionHandler getInstance(){
+	private static PublicCloudSessionHandler instance=null;
+	public static PublicCloudSessionHandler getInstance(){
 		if(instance==null){
 			instance = new PublicCloudSessionHandler();
 		}
