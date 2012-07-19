@@ -70,8 +70,6 @@ public class OVHServerToNodeMetadata implements Function<InstanceStruct, NodeMet
 			.put(InstanceStatusEnum.TO_DELETE, Status.UNRECOGNIZED)//
 			.build();
 
-//	@Inject
-//	private PublicCloudSessionHandler sessionHandler;
 	private PublicCloudSessionHandler sessionHandler = PublicCloudSessionHandler.getInstance();
 	private CloudInstance cloudService;
 
@@ -111,7 +109,7 @@ public class OVHServerToNodeMetadata implements Function<InstanceStruct, NodeMet
 		builder.publicAddresses(ImmutableSet.<String> of(from.getIpv4()));
 		// builder.privateAddresses(ImmutableSet.<String> of(""));
 
-		if (SessionParameters.loginSsh == null) {
+		if (SessionParameters.getLoginSsh() == null) {
 			// previous version to execute ssh command
 			CredentialsStruct ovhCredendials = credentialStore.get(from.getName());
 			if (from != null && ovhCredendials == null) {
@@ -132,7 +130,7 @@ public class OVHServerToNodeMetadata implements Function<InstanceStruct, NodeMet
 			}
 		}
 		else {
-			builder.credentials(SessionParameters.loginSsh);
+			builder.credentials(SessionParameters.getLoginSsh());
 		}
 
 		return builder.build();

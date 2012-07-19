@@ -54,12 +54,8 @@ public class OVHComputeClient {
 
 	private final Logger log = LoggerFactory.getLogger(OVHComputeClient.class);
 
-	// @Inject
-	// private PublicCloudSessionHandler sessionHandler;
 	private PublicCloudSessionHandler sessionHandler = PublicCloudSessionHandler.getInstance();
 
-	// @Inject
-	// private CloudInstance cloudService;
 	private CloudInstance cloudService = null;
 
 	protected ProjectStruct currentProject = null;

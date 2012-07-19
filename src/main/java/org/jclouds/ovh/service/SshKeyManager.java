@@ -86,10 +86,9 @@ public class SshKeyManager {
 	}
 	
 	public void printProjectSshKeys(){
-		List<SshKeyStruct> keys;
 		try {
 			System.out.println("project ssh keys:");
-			keys = cloudService.getSshKeys(SessionParameters.getJcloudsProj());
+			List<SshKeyStruct> keys = cloudService.getSshKeys(SessionParameters.getJcloudsProj());
 			for (SshKeyStruct sshKeyStruct : keys) {
 				System.out.println(sshKeyStruct.getName());
 			}

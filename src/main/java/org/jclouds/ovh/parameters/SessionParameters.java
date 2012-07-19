@@ -11,9 +11,10 @@ public class SessionParameters {
 	private static String jcloudsProj  = null;
 	private static String jcloudsLogin = null;
 	private static String jcloudsPwd   = null;
-	public static LoginCredentials loginSsh = null;
+	private static LoginCredentials loginSsh = null;
 	
 	
+
 	public static final String CLOUD_LANG  = "fr";
 	public static final boolean CLOUD_MULT = false;
 	
@@ -23,7 +24,13 @@ public class SessionParameters {
 	public static String getUniqueJCloudsInstanceName(){return CLOUD_NEW_INSTANCE+(jcloudsId++);}
 	
 	
-	
+
+	public static LoginCredentials getLoginSsh() {
+		return loginSsh;
+	}
+	public static void setLoginSsh(LoginCredentials loginSsh) {
+		SessionParameters.loginSsh = loginSsh;
+	}
 	public static String getJcloudsProj() {
 		return jcloudsProj;
 	}
