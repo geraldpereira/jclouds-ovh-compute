@@ -10,13 +10,11 @@ import org.jclouds.ovh.parameters.SessionParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.Inject;
 import com.ovh.ws.api.OvhWsException;
-import com.ovh.ws.api.auth.AuthProvider;
 import com.ovh.ws.cloud._public.instance.r3.CloudInstance;
 import com.ovh.ws.cloud._public.instance.r3.structure.NotificationResultStruct;
 import com.ovh.ws.cloud._public.instance.r3.structure.SshKeyStruct;
-import com.ovh.ws.jsonizer.api.Jsonizer;
-import com.ovh.ws.jsonizer.api.http.HttpClient;
 
 public class SshKeyManager {
 
@@ -26,10 +24,7 @@ public class SshKeyManager {
 
 	private List<SshKeyStruct> keys = new ArrayList<SshKeyStruct>();
 
-	// @Inject
-	// private PublicCloudSessionHandler sessionHandler;
-	private PublicCloudSessionHandler sessionHandler = PublicCloudSessionHandler.getInstance();
-
+	@Inject
 	private CloudInstance cloudService;
 
 	public static SshKeyManager getInstance() {
@@ -39,26 +34,6 @@ public class SshKeyManager {
 		return instance;
 	}
 
-	public SshKeyManager() {
-		cloudService = getCloudInstance();
-	}
-
-	private CloudInstance getCloudInstance() {
-		HttpClient httpClient = Jsonizer.createHttpClient();
-		httpClient.setTimeout(3000);
-		return new CloudInstance(httpClient, new AuthProvider() {
-
-			@Override
-			public String getToken() {
-				return sessionHandler.getSessionWithToken().getToken();
-			}
-
-			@Override
-			public String getSessionId() {
-				return sessionHandler.getSessionId();
-			}
-		});
-	}
 
 	public void getLocalPublicKeys() {
 		keys.clear();

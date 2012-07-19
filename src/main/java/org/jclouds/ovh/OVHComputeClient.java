@@ -29,7 +29,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.inject.Inject;
 import com.ovh.ws.api.OvhWsException;
+import com.ovh.ws.api.auth.AuthProvider;
 import com.ovh.ws.cloud._public.instance.r3.CloudInstance;
 import com.ovh.ws.cloud._public.instance.r3.structure.CredentialsStruct;
 import com.ovh.ws.cloud._public.instance.r3.structure.DistributionStruct;
@@ -40,8 +42,6 @@ import com.ovh.ws.cloud._public.instance.r3.structure.TaskStatusEnum;
 import com.ovh.ws.cloud._public.instance.r3.structure.TaskStruct;
 import com.ovh.ws.cloud._public.instance.r3.structure.ZoneStruct;
 import com.ovh.ws.definitions.ovhgenerictype.r2.structure.CommandStatus;
-import com.ovh.ws.jsonizer.api.Jsonizer;
-import com.ovh.ws.jsonizer.api.http.HttpClient;
 
 /**
  * This would be replaced with the real connection to the service that can
@@ -50,13 +50,15 @@ import com.ovh.ws.jsonizer.api.http.HttpClient;
  * @author David Krolak
  */
 @Singleton
-public class OVHComputeClient {
+public class OVHComputeClient implements AuthProvider{
 
 	private final Logger log = LoggerFactory.getLogger(OVHComputeClient.class);
 
-	private PublicCloudSessionHandler sessionHandler = PublicCloudSessionHandler.getInstance();
+	@Inject
+	private PublicCloudSessionHandler sessionHandler;
 
-	private CloudInstance cloudService = null;
+	@Inject
+	private CloudInstance cloudService;
 
 	protected ProjectStruct currentProject = null;
 
@@ -72,17 +74,9 @@ public class OVHComputeClient {
 		log.debug("login");
 		if (!sessionHandler.isLoggin()) {
 			sessionHandler.login();
-			if (cloudService == null) {
-				cloudService = getCloudInstance();
-			}
 		}
 	}
 
-	private CloudInstance getCloudInstance() {
-		HttpClient httpClient = Jsonizer.createHttpClient();
-		httpClient.setTimeout(3000);
-		return new CloudInstance(httpClient, sessionHandler.getSessionWithToken());
-	}
 
 	private void setCurrentProjectNamed(final String name) throws OvhWsException {
 		log.debug("setCurrentProjectNamed");
@@ -212,5 +206,15 @@ public class OVHComputeClient {
 
 	public CredentialsStruct getCredential(String name) throws OvhWsException {
 			return cloudService.getLoginInformations(getServer(name).getId());
+	}
+	
+	@Override
+	public String getToken() {
+		return sessionHandler.getToken();
+	}
+
+	@Override
+	public String getSessionId() {
+		return sessionHandler.getSessionId();
 	}
 }

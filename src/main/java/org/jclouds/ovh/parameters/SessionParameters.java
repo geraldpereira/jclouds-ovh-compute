@@ -4,7 +4,7 @@ import org.jclouds.domain.LoginCredentials;
 
 public class SessionParameters {
 
-	public SessionParameters(){
+	private SessionParameters(){
 		
 	}
 	

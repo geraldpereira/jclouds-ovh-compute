@@ -48,13 +48,10 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.ovh.ws.api.OvhWsException;
-import com.ovh.ws.api.auth.AuthProvider;
 import com.ovh.ws.cloud._public.instance.r3.CloudInstance;
 import com.ovh.ws.cloud._public.instance.r3.structure.CredentialsStruct;
 import com.ovh.ws.cloud._public.instance.r3.structure.InstanceStatusEnum;
 import com.ovh.ws.cloud._public.instance.r3.structure.InstanceStruct;
-import com.ovh.ws.jsonizer.api.Jsonizer;
-import com.ovh.ws.jsonizer.api.http.HttpClient;
 
 /**
  * @author Adrian Cole
@@ -70,7 +67,9 @@ public class OVHServerToNodeMetadata implements Function<InstanceStruct, NodeMet
 			.put(InstanceStatusEnum.TO_DELETE, Status.UNRECOGNIZED)//
 			.build();
 
-	private PublicCloudSessionHandler sessionHandler = PublicCloudSessionHandler.getInstance();
+	@Inject
+	private PublicCloudSessionHandler sessionHandler;
+	@Inject
 	private CloudInstance cloudService;
 
 	private final Logger log = LoggerFactory.getLogger(OVHServerToNodeMetadata.class);
@@ -114,9 +113,6 @@ public class OVHServerToNodeMetadata implements Function<InstanceStruct, NodeMet
 			CredentialsStruct ovhCredendials = credentialStore.get(from.getName());
 			if (from != null && ovhCredendials == null) {
 				try {
-					if (cloudService == null) {
-						cloudService = getCloudInstance();
-					}
 					ovhCredendials = cloudService.getLoginInformations(from.getId());
 				}
 				catch (OvhWsException e) {
@@ -134,23 +130,6 @@ public class OVHServerToNodeMetadata implements Function<InstanceStruct, NodeMet
 		}
 
 		return builder.build();
-	}
-
-	private CloudInstance getCloudInstance() {
-		HttpClient httpClient = Jsonizer.createHttpClient();
-		httpClient.setTimeout(3000);
-		return new CloudInstance(httpClient, new AuthProvider() {
-
-			@Override
-			public String getToken() {
-				return sessionHandler.getSessionWithToken().getToken();
-			}
-
-			@Override
-			public String getSessionId() {
-				return sessionHandler.getSessionId();
-			}
-		});
 	}
 
 	@Singleton
