@@ -24,23 +24,29 @@
     <parent>
         <groupId>org.jclouds</groupId>
         <artifactId>jclouds-project</artifactId>
-        <version>1.5.0-beta.7</version>
+        <version>1.5.0-beta.8</version>
     </parent>
-    <groupId>org.jclouds.ovh</groupId>
-    <artifactId>jclouds-ovhcompute</artifactId>
+    <groupId>org.jclouds.labs</groupId>
+    <artifactId>ovh-ws</artifactId>
 
-    <name>ovh compute provider</name>
+    <name>ovh compute api</name>
+    <description>ovh compute components connected to r3 implementation of public cloud</description>
     <packaging>bundle</packaging>
 
     <properties>
         <!-- when instances are hung, open a ticket and add here -->
-        <jclouds.compute.blacklist-nodes>trmkrun-ccc,test.trmk-924</jclouds.compute.blacklist-nodes>
-        <test.ovh.endpoint>https://www.ovh.com</test.ovh.endpoint>
-        <test.ovh.apiversion>1.0</test.ovh.apiversion>
-        <test.ovh.identity>LOGIN</test.ovh.identity>
+        <test.ovh.endpoint>https://ws.ovh.com</test.ovh.endpoint>
+        <test.ovh.apiversion>3.0</test.ovh.apiversion>
+   	 	<test.ovh.build-version></test.ovh.build-version>
+    	<test.ovh.identity>FIXME_IDENTITY</test.ovh.identity>
+    	<test.ovh.credential>FIXME_CREDENTIALS</test.ovh.credential>
 		<jsonizer.version>2.0.0</jsonizer.version>
-      <jclouds.osgi.export>org.jclouds.ovh*;version="${project.version}"</jclouds.osgi.export>
-      <jclouds.osgi.import>org.jclouds*;version="${project.version}",*</jclouds.osgi.import>
+      	<jclouds.osgi.export>org.jclouds.ovh*;version="${project.version}"</jclouds.osgi.export>
+      	<jclouds.osgi.import>
+      		org.jclouds.rest.internal;version="${project.version}",
+      		version="${project.version}",
+      		*
+      	</jclouds.osgi.import>
     </properties>
     
     
@@ -62,6 +68,14 @@
 			<artifactId>jersey-client</artifactId>
 			<version>1.12</version>
 		</dependency>
+		
+	    <dependency>
+	      <groupId>org.jclouds</groupId>
+	      <artifactId>jclouds-compute</artifactId>
+	      <version>${project.version}</version>
+	      <type>test-jar</type>
+	      <scope>test</scope>
+	    </dependency>
         <dependency>
             <groupId>org.jclouds</groupId>
             <artifactId>jclouds-core</artifactId>
@@ -69,37 +83,24 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jclouds</groupId>
-            <artifactId>jclouds-compute</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jclouds</groupId>
-            <artifactId>jclouds-compute</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jclouds.driver</groupId>
-            <artifactId>jclouds-log4j</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jclouds.driver</groupId>
-            <artifactId>jclouds-jsch</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
         
+        <dependency>
+            <groupId>org.jclouds</groupId>
+            <artifactId>jclouds-compute</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+	      <groupId>org.jclouds.driver</groupId>
+	      <artifactId>jclouds-slf4j</artifactId>
+	      <version>${project.version}</version>
+	      <scope>test</scope>
+   	 	</dependency>
+    	<dependency>
+	      <groupId>org.jclouds.driver</groupId>
+	      <artifactId>jclouds-sshj</artifactId>
+	      <version>${project.version}</version>
+	      <scope>test</scope>
+    	</dependency>
     </dependencies>
 
     <profiles>
@@ -121,8 +122,9 @@
                                     <systemPropertyVariables>
                                         <test.ovh.endpoint>${test.ovh.endpoint}</test.ovh.endpoint>
                                         <test.ovh.apiversion>${test.ovh.apiversion}</test.ovh.apiversion>
+                    					<test.ovh.build-version>${test.ovh.build-version}</test.ovh.build-version>
                                         <test.ovh.identity>${test.ovh.identity}</test.ovh.identity>
-                                        <jclouds.compute.blacklist-nodes>${jclouds.compute.blacklist-nodes}</jclouds.compute.blacklist-nodes>
+                                        <test.ovh.credential>${test.ovh.credential}</test.ovh.credential>
                                     </systemPropertyVariables>
                                 </configuration>
                             </execution>

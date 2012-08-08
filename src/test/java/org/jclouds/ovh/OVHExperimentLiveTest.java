@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jclouds.ovh.compute;
+package org.jclouds.ovh;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeServiceContext;

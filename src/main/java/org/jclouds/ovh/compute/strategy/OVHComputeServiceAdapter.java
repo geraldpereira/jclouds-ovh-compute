@@ -23,16 +23,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceAdapter;
 import org.jclouds.compute.domain.Template;
+import org.jclouds.compute.reference.ComputeServiceConstants;
 import org.jclouds.domain.LoginCredentials;
+import org.jclouds.logging.Logger;
 import org.jclouds.ovh.OVHComputeClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ovh.ws.api.OvhWsException;
 import com.ovh.ws.cloud._public.instance.r3.structure.CredentialsStruct;
@@ -48,148 +50,137 @@ import com.ovh.ws.cloud._public.instance.r3.structure.ZoneStruct;
  */
 @Singleton
 public class OVHComputeServiceAdapter implements
-		ComputeServiceAdapter<InstanceStruct, OfferStruct, DistributionStruct, ZoneStruct> {
-	private final OVHComputeClient client;
+      ComputeServiceAdapter<InstanceStruct, OfferStruct, DistributionStruct, ZoneStruct> {
+   private final OVHComputeClient client;
+   @Resource
+   @Named(ComputeServiceConstants.COMPUTE_LOGGER)
+   private Logger log = Logger.NULL;
 
-	private final Logger log = LoggerFactory.getLogger(OVHComputeServiceAdapter.class);
+   @Inject
+   public OVHComputeServiceAdapter(OVHComputeClient client) {
+      this.client = checkNotNull(client, "client");
+   }
 
-	@Inject
-	public OVHComputeServiceAdapter(OVHComputeClient client) {
-		this.client = checkNotNull(client, "client");
-	}
+   @Override
+   public NodeAndInitialCredentials<InstanceStruct> createNodeWithGroupEncodedIntoName(String tag, String name,
+         Template template) {
+      NodeAndInitialCredentials<InstanceStruct> nodeCred = null;
+      try {
+         // create the backend object using parameters from the template.
+         InstanceStruct from = client.createServerInDC(template.getLocation().getId(), name, template.getImage()
+               .getName(), template.getHardware().getName());
 
-	@Override
-	public NodeAndInitialCredentials<InstanceStruct> createNodeWithGroupEncodedIntoName(String tag,
-			String name, Template template) {
-		NodeAndInitialCredentials<InstanceStruct> nodeCred = null;
-		try {
-			// create the backend object using parameters from the template.
-			InstanceStruct from = client.createServerInDC(template.getLocation().getId(), name,
-					template.getImage().getName(), template.getHardware().getName());
-			
-			// request credentials and convert it
-			CredentialsStruct cred = client.getCredential(name);
-			nodeCred = new NodeAndInitialCredentials<InstanceStruct>(from, from.getName() + "",
-					LoginCredentials.builder().user(cred.getLogin()).password(cred.getPassword())
-							.build());
-		}
-		catch (Exception e) {
-			log.error("createNodeWithGroupEncodedIntoName:{}", e.getMessage());
-		}
-		return nodeCred;
-	}
+         // request credentials and convert it
+         CredentialsStruct cred = client.getCredential(name);
+         nodeCred = new NodeAndInitialCredentials<InstanceStruct>(from, from.getName() + "", LoginCredentials.builder()
+               .user(cred.getLogin()).password(cred.getPassword()).build());
+      } catch (Exception e) {
+         log.error("createNodeWithGroupEncodedIntoName:{}", e.getMessage());
+      }
+      return nodeCred;
+   }
 
-	@Override
-	public List<OfferStruct> listHardwareProfiles() {
-		List<OfferStruct> hw = new ArrayList<OfferStruct>();
-		try {
-			hw = client.listHardware();
-		}
-		catch (Exception e) {
-			log.error("listHardwareProfiles:{}", e.getMessage());
-		}
-		return hw;
-	}
+   @Override
+   public List<OfferStruct> listHardwareProfiles() {
+      List<OfferStruct> hw = new ArrayList<OfferStruct>();
+      try {
+         hw = client.listHardware();
+      } catch (Exception e) {
+         log.error("listHardwareProfiles:{}", e.getMessage());
+      }
+      return hw;
+   }
 
-	@Override
-	public List<DistributionStruct> listImages() {
-		List<DistributionStruct> im = new ArrayList<DistributionStruct>();
-		try {
-			im = client.listImages();
-		}
-		catch (OvhWsException e) {
-			log.error("listImages:{}", e.getMessage());
-		}
-		return im;
-	}
-	
-	@Override
-	public DistributionStruct getImage(String arg0) {
-		DistributionStruct d = null;
-		try {
-			d = client.getImage(arg0);
-		}
-		catch (OvhWsException e) {
-			log.error("getImage:{}", e.getMessage());
-		}
-		return d;
-	}
+   @Override
+   public List<DistributionStruct> listImages() {
+      List<DistributionStruct> im = new ArrayList<DistributionStruct>();
+      try {
+         im = client.listImages();
+      } catch (OvhWsException e) {
+         log.error("listImages:{}", e.getMessage());
+      }
+      return im;
+   }
 
-	@Override
-	public Iterable<InstanceStruct> listNodes() {
-		Iterable<InstanceStruct> nodes = null;
-		try {
-			nodes = client.listServers();
-		}
-		catch (OvhWsException e) {
-			log.error("listNodes:{}", e.getMessage());
-		}
-		return nodes;
-	}
+   @Override
+   public DistributionStruct getImage(String arg0) {
+      DistributionStruct d = null;
+      try {
+         d = client.getImage(arg0);
+      } catch (OvhWsException e) {
+         log.error("getImage:{}", e.getMessage());
+      }
+      return d;
+   }
 
-	@Override
-	public Iterable<ZoneStruct> listLocations() {
-		Iterable<ZoneStruct> z = null;
-		try {
-			z =  client.listZones();
-		}
-		catch (OvhWsException e) {
-			log.error("listLocations:{}", e.getMessage());
-		}
-		return z;
-	}
+   @Override
+   public Iterable<InstanceStruct> listNodes() {
+      Iterable<InstanceStruct> nodes = null;
+      try {
+         nodes = client.listServers();
+      } catch (OvhWsException e) {
+         log.error("listNodes:{}", e.getMessage());
+      }
+      return nodes;
+   }
 
-	@Override
-	public InstanceStruct getNode(String id) {
-		InstanceStruct i = null;
-		try {
-			i = client.getServer(id);
-		}
-		catch (OvhWsException e) {
-			log.error("getNode:{}", e.getMessage());
-		}
-		return i;
-	}
+   @Override
+   public Iterable<ZoneStruct> listLocations() {
+      Iterable<ZoneStruct> z = null;
+      try {
+         z = client.listZones();
+      } catch (OvhWsException e) {
+         log.error("listLocations:{}", e.getMessage());
+      }
+      return z;
+   }
 
-	@Override
-	public void destroyNode(String id) {
-		try {
-			client.destroyServer(id);
-		}
-		catch (OvhWsException e) {
-			log.error("destroyServer:{}", e.getMessage());
-		}
-	}
+   @Override
+   public InstanceStruct getNode(String id) {
+      InstanceStruct i = null;
+      try {
+         i = client.getServer(id);
+      } catch (OvhWsException e) {
+         log.error("getNode:{}", e.getMessage());
+      }
+      return i;
+   }
 
-	@Override
-	public void rebootNode(String id) {
-		try {
-			client.rebootServer(id);
-		}
-		catch (OvhWsException e) {
-			log.error("destroyServer:{}", e.getMessage());
-		}
-	}
+   @Override
+   public void destroyNode(String id) {
+      try {
+         client.destroyServer(id);
+      } catch (OvhWsException e) {
+         log.error("destroyServer:{}", e.getMessage());
+      }
+   }
 
-	@Override
-	public void resumeNode(String id) {
-		try {
-			client.startServer(id);
-		}
-		catch (OvhWsException e) {
-			log.error("resumeNode:{}", e.getMessage());
-		}
+   @Override
+   public void rebootNode(String id) {
+      try {
+         client.rebootServer(id);
+      } catch (OvhWsException e) {
+         log.error("destroyServer:{}", e.getMessage());
+      }
+   }
 
-	}
+   @Override
+   public void resumeNode(String id) {
+      try {
+         client.startServer(id);
+      } catch (OvhWsException e) {
+         log.error("resumeNode:{}", e.getMessage());
+      }
 
-	@Override
-	public void suspendNode(String id) {
-		try {
-			client.stopServer(id);
-		}
-		catch (OvhWsException e) {
-			log.error("suspendNode:{}", e.getMessage());
-		}
-	}
+   }
 
+   @Override
+   public void suspendNode(String id) {
+      try {
+         client.stopServer(id);
+      } catch (OvhWsException e) {
+         log.error("suspendNode:{}", e.getMessage());
+      }
+   }
+   
 }

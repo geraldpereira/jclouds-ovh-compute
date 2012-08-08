@@ -34,7 +34,7 @@ import com.ovh.ws.cloud._public.instance.r3.structure.OfferStruct;
  * @author David Krolak
  */
 @Singleton
-public class OVHHardwareToHardware implements Function<OfferStruct, Hardware> {
+public class OfferStructToHardware implements Function<OfferStruct, Hardware> {
 
    @Override
    public Hardware apply(OfferStruct from) {

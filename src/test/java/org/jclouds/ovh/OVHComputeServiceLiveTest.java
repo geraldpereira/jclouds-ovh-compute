@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.jclouds.ovh.compute;
+package org.jclouds.ovh;
 
 import static org.jclouds.compute.util.ComputeServiceUtils.getCores;
 import static org.testng.Assert.assertEquals;
@@ -25,7 +25,7 @@ import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.OsFamily;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.internal.BaseComputeServiceLiveTest;
-import org.jclouds.ssh.jsch.config.JschSshClientModule;
+import org.jclouds.sshj.config.SshjSshClientModule;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -51,8 +51,8 @@ public class OVHComputeServiceLiveTest extends BaseComputeServiceLiveTest {
 	   }
 
 	   @Override
-	   protected JschSshClientModule getSshModule() {
-	      return new JschSshClientModule();
+	   protected SshjSshClientModule getSshModule() {
+	      return new SshjSshClientModule();
 	   }
 
 	   // servermanager does not support metadata

@@ -37,31 +37,29 @@ import com.ovh.ws.cloud._public.instance.r3.structure.DistributionStruct;
  * @author David Krolak
  */
 @Singleton
-public class OVHImageToImage implements Function<DistributionStruct, Image> {
-	@Resource
-	@Named(ComputeServiceConstants.COMPUTE_LOGGER)
-	protected Logger logger = Logger.NULL;
+public class DistributionStructToImage implements Function<DistributionStruct, Image> {
+   @Resource
+   @Named(ComputeServiceConstants.COMPUTE_LOGGER)
+   protected Logger logger = Logger.NULL;
 
-	@Override
-	public Image apply(DistributionStruct from) {
+   @Override
+   public Image apply(DistributionStruct from) {
 
-		ImageBuilder builder = new ImageBuilder().providerId("ovh").ids(from.getName())
-				.name(from.getName()).description(from.getDescription()).status(Status.AVAILABLE);
-		
-		OsFamily family = null;
+      ImageBuilder builder = new ImageBuilder().providerId("ovh").ids(from.getName()).name(from.getName())
+            .description(from.getDescription()).status(Status.AVAILABLE);
 
-		try {
-			family = OsFamily.valueOf(from.getBase().toUpperCase());
+      OsFamily family = null;
 
-			builder.operatingSystem(new OperatingSystem.Builder().name(from.getName())
-					.description(from.getDescription()).family(family).version(null)
-					.is64Bit("64".equalsIgnoreCase(from.getPlatform())).arch(null).build());
-		}
-		catch (IllegalArgumentException e) {
-			logger.debug("<< didn't match os(%s)", from);
-		}
-		
-		return builder.build();
-	}
+      try {
+         family = OsFamily.valueOf(from.getBase().toUpperCase());
+
+         builder.operatingSystem(new OperatingSystem.Builder().name(from.getName()).description(from.getDescription())
+               .family(family).version(null).is64Bit("64".equalsIgnoreCase(from.getPlatform())).arch(null).build());
+      } catch (IllegalArgumentException e) {
+         logger.debug("<< didn't match os(%s)", from);
+      }
+
+      return builder.build();
+   }
 
 }

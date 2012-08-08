@@ -18,8 +18,6 @@
  */
 package org.jclouds.ovh.compute.functions;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.jclouds.domain.Location;
@@ -27,29 +25,22 @@ import org.jclouds.domain.LocationBuilder;
 import org.jclouds.domain.LocationScope;
 
 import com.google.common.base.Function;
-import com.google.common.base.Supplier;
 import com.ovh.ws.cloud._public.instance.r3.structure.ZoneStruct;
 
 /**
  * @author David Krolak
  */
 @Singleton
-public class OVHDatacenterToLocation implements Function<ZoneStruct, Location> {
-//   private final Provider<Supplier<Location>> provider;
-
-   // allow us to lazy discover the provider of a resource
-   @Inject
-   public OVHDatacenterToLocation(Provider<Supplier<Location>> provider) {
-//      this.provider = checkNotNull(provider, "provider");
-   }
+public class ZoneStructToLocation implements Function<ZoneStruct, Location> {
 
    @Override
    public Location apply(ZoneStruct from) {
-		LocationBuilder builder = new LocationBuilder().scope(LocationScope.ZONE);
-		builder = builder.id(from.getName() + ""); 
-		builder = builder.description(from.getName() + ""); 
-		builder = builder.parent(new LocationBuilder().scope(LocationScope.ZONE).id("ovh").description(from.getName() + "").build());
-		return builder.build();
+      LocationBuilder builder = new LocationBuilder().scope(LocationScope.ZONE);
+      builder = builder.id(from.getName() + "");
+      builder = builder.description(from.getName() + "");
+      builder = builder.parent(new LocationBuilder().scope(LocationScope.ZONE).id("ovh")
+            .description(from.getName() + "").build());
+      return builder.build();
    }
 
 }
