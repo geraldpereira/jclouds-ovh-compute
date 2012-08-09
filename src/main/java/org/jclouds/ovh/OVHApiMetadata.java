@@ -38,7 +38,7 @@ public class OVHApiMetadata extends BaseApiMetadata {
    public static class Builder extends BaseApiMetadata.Builder {
 
       protected Builder() {
-         id("ovh").name("ovh").identityName("ovh").defaultIdentity("jj35216").defaultCredential("jcloudstest")
+         id("ovh").name("ovh").identityName("ovh").defaultIdentity("FIXME_IDENTITY").defaultCredential("FIXME_CREDENTIALS")
                .defaultEndpoint("http://ws.ovh.com")
                .documentation(URI.create("http://www.jclouds.org/documentation/userguide/compute"))
                .view(ComputeServiceContext.class).defaultModule(OVHComputeServiceContextModule.class);
