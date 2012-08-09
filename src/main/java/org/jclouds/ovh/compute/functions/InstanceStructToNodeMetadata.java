@@ -82,7 +82,7 @@ public class InstanceStructToNodeMetadata implements Function<InstanceStruct, No
    private final GroupNamingConvention nodeNamingConvention;
 
    @Inject
-   InstanceStructToNodeMetadata(Map<String, Credentials> credentialStore, FindHardwareForServer findHardwareForServer,
+   InstanceStructToNodeMetadata(FindHardwareForServer findHardwareForServer,
          FindLocationForServer findLocationForServer, FindImageForServer findImageForServer,
          GroupNamingConvention.Factory namingConvention) {
       this.nodeNamingConvention = checkNotNull(namingConvention, "namingConvention").createWithoutPrefix();
