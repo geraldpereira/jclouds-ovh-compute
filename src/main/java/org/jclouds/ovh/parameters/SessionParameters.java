@@ -7,13 +7,20 @@ import org.jclouds.javax.annotation.Nullable;
 
 public class SessionParameters {
 
-   public static SessionParameters sessionParameters = null;
+   private static SessionParameters sessionParameters = null;
+   
+   public static SessionParameters getSessionParameters() {
+      return sessionParameters;
+   }
+   public static void setSessionParameters(SessionParameters sessionParameters) {
+      SessionParameters.sessionParameters = sessionParameters;
+   }
    
    public SessionParameters(String login, String pwd, String project, LoginCredentials loginSsh) {
-      jcloudsLogin = login;
-      jcloudsPwd = pwd;
-      jcloudsProj = project;
-      
+      this.jcloudsLogin = login;
+      this.jcloudsPwd = pwd;
+      this.jcloudsProj = project;
+      this.loginSsh = loginSsh;
    }
 
    private String jcloudsProj;

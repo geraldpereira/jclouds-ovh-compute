@@ -55,9 +55,8 @@ public class PublicCloudSessionHandler {
 
    public void login() {
       try {
-         sessionWithToken = sessionHandler.login(SessionParameters.sessionParameters.getJcloudsLogin(),
-               SessionParameters.sessionParameters.getJcloudsPwd(), SessionParameters.CLOUD_LANG, null);
-         System.out.println(sessionWithToken);
+         sessionWithToken = sessionHandler.login(SessionParameters.getSessionParameters().getJcloudsLogin(),
+               SessionParameters.getSessionParameters().getJcloudsPwd(), SessionParameters.CLOUD_LANG, null);
       } catch (OvhWsException e) {
          log.error("login:{}", e.getMessage());
       }

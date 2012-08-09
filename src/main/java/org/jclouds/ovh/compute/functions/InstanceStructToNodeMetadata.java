@@ -71,7 +71,6 @@ public class InstanceStructToNodeMetadata implements Function<InstanceStruct, No
    @Inject
    private CloudInstance cloudService;
 
-
    @Resource
    @Named(ComputeServiceConstants.COMPUTE_LOGGER)
    private Logger log = Logger.NULL;
@@ -109,7 +108,7 @@ public class InstanceStructToNodeMetadata implements Function<InstanceStruct, No
       builder.publicAddresses(ImmutableSet.<String> of(from.getIpv4()));
       // builder.privateAddresses(ImmutableSet.<String> of(""));
 
-      if (SessionParameters.sessionParameters.getLoginSsh() == null) {
+      if (SessionParameters.getSessionParameters().getLoginSsh() == null) {
          // previous version to execute ssh command
          CredentialsStruct ovhCredendials = credentialStore.get(from.getName());
          if (from != null && ovhCredendials == null) {
@@ -125,7 +124,7 @@ public class InstanceStructToNodeMetadata implements Function<InstanceStruct, No
                   ovhCredendials.getPassword())));
          }
       } else {
-         builder.credentials(SessionParameters.sessionParameters.getLoginSsh());
+         builder.credentials(SessionParameters.getSessionParameters().getLoginSsh());
       }
 
       return builder.build();
