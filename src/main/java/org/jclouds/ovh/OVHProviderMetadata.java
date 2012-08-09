@@ -8,6 +8,8 @@ import org.jclouds.providers.internal.BaseProviderMetadata;
 
 public class OVHProviderMetadata  extends BaseProviderMetadata {
 
+   private static final long serialVersionUID = -1729176269980627849L;
+
    public static Builder builder() {
       return new Builder();
    }

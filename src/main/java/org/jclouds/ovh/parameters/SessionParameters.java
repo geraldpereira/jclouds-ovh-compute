@@ -1,66 +1,79 @@
 package org.jclouds.ovh.parameters;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.jclouds.domain.LoginCredentials;
+import org.jclouds.javax.annotation.Nullable;
 
 public class SessionParameters {
 
-   private SessionParameters() {
-
+   public static SessionParameters sessionParameters = null;
+   
+   public SessionParameters(String login, String pwd, String project, LoginCredentials loginSsh) {
+      jcloudsLogin = login;
+      jcloudsPwd = pwd;
+      jcloudsProj = project;
+      
    }
 
-   private static String jcloudsProj = null;
-   private static String jcloudsLogin = null;
-   private static String jcloudsPwd = null;
-   private static LoginCredentials loginSsh = null;
+   private String jcloudsProj;
+   private String jcloudsLogin;
+   private String jcloudsPwd;
+   private LoginCredentials loginSsh;
 
    public static final String CLOUD_LANG = "fr";
    public static final boolean CLOUD_MULT = false;
 
-   private static final String CLOUD_NEW_INSTANCE = "jclouds";
-   private static int jcloudsId = 0;
-
-   public static String getUniqueJCloudsInstanceName() {
-      return CLOUD_NEW_INSTANCE + (jcloudsId++);
-   }
-
-   public static LoginCredentials getLoginSsh() {
+   public LoginCredentials getLoginSsh() {
       return loginSsh;
    }
-
-   public static void setLoginSsh(LoginCredentials loginSsh) {
-      SessionParameters.loginSsh = loginSsh;
-   }
-
-   public static String getJcloudsProj() {
+   public String getJcloudsProj() {
       return jcloudsProj;
    }
 
-   public static void setJcloudsProj(String jcloudsProj) {
-      SessionParameters.jcloudsProj = jcloudsProj;
-   }
-
-   public static String getJcloudsLogin() {
+   public String getJcloudsLogin() {
       return jcloudsLogin;
    }
 
-   public static void setJcloudsLogin(String jcloudsLogin) {
-      SessionParameters.jcloudsLogin = jcloudsLogin;
-   }
-
-   public static String getJcloudsPwd() {
+   public String getJcloudsPwd() {
       return jcloudsPwd;
    }
-
-   public static void setJcloudsPwd(String jcloudsPwd) {
-      SessionParameters.jcloudsPwd = jcloudsPwd;
+   
+   public static class Builder{
+      private String login = null;
+      private String pwd = null;
+      private String project = null;
+      private LoginCredentials loginSsh = null;
+      
+      public Builder(){
+         
+      }
+      
+      public Builder login(String login){
+         checkNotNull(login,"login");
+         this.login = login;
+         return this;
+      }
+      
+      public Builder pwd(String pwd){
+         checkNotNull(pwd,"pwd");
+         this.pwd = pwd;
+         return this;
+      }
+      
+      public Builder project(String project){
+         checkNotNull(project,"project");
+         this.project = project;
+         return this;
+      }
+      
+      public Builder loginSsh(@Nullable LoginCredentials loginSsh){
+         this.loginSsh = loginSsh;
+         return this;
+      }
+      
+      public SessionParameters build(){
+         return new SessionParameters(login, pwd, project, loginSsh);
+      }
    }
-
-   public static int getJcloudsId() {
-      return jcloudsId;
-   }
-
-   public static void setJcloudsId(int jcloudsId) {
-      SessionParameters.jcloudsId = jcloudsId;
-   }
-
 }

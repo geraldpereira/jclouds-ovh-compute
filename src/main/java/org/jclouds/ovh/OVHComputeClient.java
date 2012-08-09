@@ -122,7 +122,7 @@ public class OVHComputeClient implements AuthProvider {
    public InstanceStruct createServerInDC(String datacenter, String name, String imageId, String hardwareId)
          throws OvhWsException {
       if (currentProject == null)
-         setCurrentProjectNamed(SessionParameters.getJcloudsProj());
+         setCurrentProjectNamed(SessionParameters.sessionParameters.getJcloudsProj());
       CommandStatus status = cloudService.newInstance(currentProject.getName(), name, datacenter, "", Long.valueOf(0l),
             hardwareId, imageId);
       RetryablePredicate<Long> taskTester = new RetryablePredicate<Long>(jobComplete, 300, 10,
@@ -135,7 +135,7 @@ public class OVHComputeClient implements AuthProvider {
    public Iterable<InstanceStruct> listServers() throws OvhWsException {
       checkSession();
       if (currentProject == null)
-         setCurrentProjectNamed(SessionParameters.getJcloudsProj());
+         setCurrentProjectNamed(SessionParameters.sessionParameters.getJcloudsProj());
       return cloudService.getInstances(currentProject.getName());
    }
 

@@ -46,7 +46,7 @@ public class SshKeyManager{
    
    public List<SshKeyStruct> getProjectSshKeys() throws OvhWsException {
       checkSession();
-      return cloudService.getSshKeys(SessionParameters.getJcloudsProj());
+      return cloudService.getSshKeys(SessionParameters.sessionParameters.getJcloudsProj());
    }
 
    public void applySshKeys() {
@@ -55,7 +55,7 @@ public class SshKeyManager{
       
       log.debug("applySshKeys");
       try {
-         List<NotificationResultStruct> notifications = cloudService.applySshKeys(SessionParameters.getJcloudsProj());
+         List<NotificationResultStruct> notifications = cloudService.applySshKeys(SessionParameters.sessionParameters.getJcloudsProj());
          if (!checkSshKeyStats(notifications)) {
             log.info("Info:" + "sshkey was not apply to whole instances");
          }
@@ -77,7 +77,7 @@ public class SshKeyManager{
    public void installSshKey(String key, String alias) {
       checkSession();
       try {
-         List<NotificationResultStruct> notifications = cloudService.newSshKey(SessionParameters.getJcloudsProj(),
+         List<NotificationResultStruct> notifications = cloudService.newSshKey(SessionParameters.sessionParameters.getJcloudsProj(),
                alias, key);
          if (!checkSshKeyStats(notifications)) {
             log.info("Info:" + "sshkey was not apply to whole instances");
@@ -90,7 +90,7 @@ public class SshKeyManager{
    public void removeSshKey(String keyName) {
       checkSession();
       try {
-         String proj = SessionParameters.getJcloudsProj();
+         String proj = SessionParameters.sessionParameters.getJcloudsProj();
          cloudService.deleteSshKey(proj, keyName);
          applySshKeys();
       } catch (OvhWsException e) {
