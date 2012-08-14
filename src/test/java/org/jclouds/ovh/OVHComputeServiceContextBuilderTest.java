@@ -20,7 +20,6 @@ package org.jclouds.ovh;
 
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeServiceContext;
-import org.jclouds.ovh.OVHApiMetadata;
 import org.testng.annotations.Test;
 
 /**
@@ -34,7 +33,7 @@ public class OVHComputeServiceContextBuilderTest {
    @Test
    public void testCanBuildDirectly() {
 	   ComputeServiceContext context = ContextBuilder.newBuilder(
-	            new OVHApiMetadata()).build(ComputeServiceContext.class);
+	            new OVHProviderMetadata()).build(ComputeServiceContext.class);
       context.close();
    }
 

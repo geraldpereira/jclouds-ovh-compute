@@ -21,12 +21,8 @@ package org.jclouds.ovh;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Resource;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.jclouds.compute.reference.ComputeServiceConstants;
-import org.jclouds.logging.Logger;
 import org.jclouds.ovh.parameters.SessionParameters;
 import org.jclouds.ovh.service.PublicCloudSessionHandler;
 import org.jclouds.predicates.RetryablePredicate;
@@ -41,7 +37,6 @@ import com.ovh.ws.cloud._public.instance.r3.structure.CredentialsStruct;
 import com.ovh.ws.cloud._public.instance.r3.structure.DistributionStruct;
 import com.ovh.ws.cloud._public.instance.r3.structure.InstanceStruct;
 import com.ovh.ws.cloud._public.instance.r3.structure.OfferStruct;
-import com.ovh.ws.cloud._public.instance.r3.structure.ProjectStruct;
 import com.ovh.ws.cloud._public.instance.r3.structure.TaskStruct;
 import com.ovh.ws.cloud._public.instance.r3.structure.ZoneStruct;
 import com.ovh.ws.definitions.ovhgenerictype.r2.structure.CommandStatus;
@@ -55,18 +50,12 @@ import com.ovh.ws.definitions.ovhgenerictype.r2.structure.CommandStatus;
 @Singleton
 public class OVHComputeClient implements AuthProvider {
 
-   @Resource
-   @Named(ComputeServiceConstants.COMPUTE_LOGGER)
-   private Logger log = Logger.NULL;
+   private final PublicCloudSessionHandler sessionHandler;
 
-   private PublicCloudSessionHandler sessionHandler;
-
-   private CloudInstance cloudService;
+   private final CloudInstance cloudService;
 
    @Inject
    private Predicate<Long> jobComplete;
-
-   protected ProjectStruct currentProject = null;
 
    @Inject
    public OVHComputeClient(PublicCloudSessionHandler sessionHandler, CloudInstance cloudService){
@@ -83,30 +72,13 @@ public class OVHComputeClient implements AuthProvider {
     * login methods
     */
    private void login() {
-      log.debug("login");
       if (!sessionHandler.isLoggin()) {
          sessionHandler.login();
       }
    }
 
-   private void setCurrentProjectNamed(final String name) throws OvhWsException {
-      log.debug("setCurrentProjectNamed");
-
-      if (!sessionHandler.isLoggin())
-         login();
-
-      currentProject = Iterables.find(cloudService.getProjects(), new Predicate<ProjectStruct>() {
-
-         @Override
-         public boolean apply(ProjectStruct input) {
-            return input.getName().equalsIgnoreCase(name);
-         }
-      });
-
-   }
-
    public TaskStruct getTask(Long taskId) throws OvhWsException {
-      return cloudService.getTask(currentProject.getName(), taskId);
+      return cloudService.getTask(SessionParameters.getSessionParameters().getJcloudsProj(), taskId);
    }
 
    /**
@@ -121,9 +93,7 @@ public class OVHComputeClient implements AuthProvider {
     */
    public InstanceStruct createServerInDC(String datacenter, String name, String imageId, String hardwareId)
          throws OvhWsException {
-      if (currentProject == null)
-         setCurrentProjectNamed(SessionParameters.getSessionParameters().getJcloudsProj());
-      CommandStatus status = cloudService.newInstance(currentProject.getName(), name, datacenter, "", Long.valueOf(0l),
+      CommandStatus status = cloudService.newInstance(SessionParameters.getSessionParameters().getJcloudsProj(), name, datacenter, "", Long.valueOf(0l),
             hardwareId, imageId);
       RetryablePredicate<Long> taskTester = new RetryablePredicate<Long>(jobComplete, 300, 10,
             TimeUnit.SECONDS);
@@ -134,9 +104,7 @@ public class OVHComputeClient implements AuthProvider {
 
    public Iterable<InstanceStruct> listServers() throws OvhWsException {
       checkSession();
-      if (currentProject == null)
-         setCurrentProjectNamed(SessionParameters.getSessionParameters().getJcloudsProj());
-      return cloudService.getInstances(currentProject.getName());
+      return cloudService.getInstances(SessionParameters.getSessionParameters().getJcloudsProj());
    }
 
    public InstanceStruct getServer(final String name) throws OvhWsException {
