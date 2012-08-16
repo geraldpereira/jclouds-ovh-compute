@@ -60,7 +60,7 @@ import com.ovh.ws.cloud._public.instance.r3.structure.InstanceStruct;
 @Singleton
 public class InstanceStructToNodeMetadata implements Function<InstanceStruct, NodeMetadata> {
 
-   public static final Map<InstanceStatusEnum, Status> serverStatusToNodeState = ImmutableMap
+   public static final Map<InstanceStatusEnum, Status> INSTANCE_STATUS_ENUM_TO_NODE_STATE = ImmutableMap
          .<InstanceStatusEnum, Status> builder().put(InstanceStatusEnum.RUNNING, Status.RUNNING)//
          .put(InstanceStatusEnum.PENDING, Status.PENDING)//
          .put(InstanceStatusEnum.STOPPED, Status.SUSPENDED)//
@@ -104,7 +104,7 @@ public class InstanceStructToNodeMetadata implements Function<InstanceStruct, No
       if (image != null)
          builder.operatingSystem(image.getOperatingSystem());
       builder.hardware(findHardwareForServer.apply(from));
-      builder.status(serverStatusToNodeState.get(from.getStatus()));
+      builder.status(INSTANCE_STATUS_ENUM_TO_NODE_STATE.get(from.getStatus()));
       builder.publicAddresses(ImmutableSet.<String> of(from.getIpv4()));
       // builder.privateAddresses(ImmutableSet.<String> of(""));
 

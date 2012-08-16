@@ -20,7 +20,6 @@ package org.jclouds.ovh.compute.strategy;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -57,7 +56,6 @@ public class OVHComputeServiceAdapter implements
    @Override
    public NodeAndInitialCredentials<InstanceStruct> createNodeWithGroupEncodedIntoName(String tag, String name,
          Template template) {
-      NodeAndInitialCredentials<InstanceStruct> nodeCred = null;
       try {
          // create the backend object using parameters from the template.
          InstanceStruct from = client.createServerInDC(template.getLocation().getId(), name, template.getImage()
@@ -65,78 +63,65 @@ public class OVHComputeServiceAdapter implements
 
          // request credentials and convert it
          CredentialsStruct cred = client.getCredential(name);
-         nodeCred = new NodeAndInitialCredentials<InstanceStruct>(from, from.getName() + "", LoginCredentials.builder()
+         return new NodeAndInitialCredentials<InstanceStruct>(from, from.getName() + "", LoginCredentials.builder()
                .user(cred.getLogin()).password(cred.getPassword()).build());
       } catch (OvhWsException e) {
          throw new RuntimeException(e);
       }
-      return nodeCred;
    }
 
    @Override
    public List<OfferStruct> listHardwareProfiles() {
-      List<OfferStruct> hw = new ArrayList<OfferStruct>();
       try {
-         hw = client.listHardware();
+         return client.listHardware();
       } catch (OvhWsException e) {
          throw new RuntimeException(e);
       }
-      return hw;
    }
 
    @Override
    public List<DistributionStruct> listImages() {
-      List<DistributionStruct> im = new ArrayList<DistributionStruct>();
       try {
-         im = client.listImages();
+         return client.listImages();
       } catch (OvhWsException e) {
          throw new RuntimeException(e);
       }
-      return im;
    }
 
    @Override
    public DistributionStruct getImage(String arg0) {
-      DistributionStruct d = null;
       try {
-         d = client.getImage(arg0);
+         return client.getImage(arg0);
       } catch (OvhWsException e) {
          throw new RuntimeException(e);
       }
-      return d;
    }
 
    @Override
    public Iterable<InstanceStruct> listNodes() {
-      Iterable<InstanceStruct> nodes = null;
       try {
-         nodes = client.listServers();
+         return client.listServers();
       } catch (OvhWsException e) {
          throw new RuntimeException(e);
       }
-      return nodes;
    }
 
    @Override
    public Iterable<ZoneStruct> listLocations() {
-      Iterable<ZoneStruct> z = null;
       try {
-         z = client.listZones();
+         return client.listZones();
       } catch (OvhWsException e) {
          throw new RuntimeException(e);
       }
-      return z;
    }
 
    @Override
    public InstanceStruct getNode(String id) {
-      InstanceStruct i = null;
       try {
-         i = client.getServer(id);
+         return client.getServer(id);
       } catch (OvhWsException e) {
          throw new RuntimeException(e);
       }
-      return i;
    }
 
    @Override
