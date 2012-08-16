@@ -29,32 +29,19 @@ public class SshKeyManager{
    @Inject
    private PublicCloudSessionHandler sessionHandler;
 
-   private void checkSession() {
-      if (sessionHandler.getSessionWithToken() == null)
-         login();
+   private void checkSession() throws OvhWsException {
+      if (sessionHandler.getToken() == null)
+         throw new OvhWsException(0, "Could not log in on OVH services");
    }
-   
-   /**
-    * login methods
-    */
-   private void login() {
-      log.debug("login");
-      if (!sessionHandler.isLoggin()) {
-         sessionHandler.login();
-      }
-   }
-   
+      
    public List<SshKeyStruct> getProjectSshKeys() throws OvhWsException {
       checkSession();
       return cloudService.getSshKeys(SessionParameters.getSessionParameters().getJcloudsProj());
    }
 
    public void applySshKeys() {
-
-      checkSession();
-      
-      log.debug("applySshKeys");
       try {
+         checkSession();
          List<NotificationResultStruct> notifications = cloudService.applySshKeys(SessionParameters.getSessionParameters().getJcloudsProj());
          if (!checkSshKeyStats(notifications)) {
             log.info("Info:" + "sshkey was not apply to whole instances");
@@ -75,8 +62,8 @@ public class SshKeyManager{
    }
 
    public void installSshKey(String key, String alias) {
-      checkSession();
       try {
+         checkSession();
          List<NotificationResultStruct> notifications = cloudService.newSshKey(SessionParameters.getSessionParameters().getJcloudsProj(),
                alias, key);
          if (!checkSshKeyStats(notifications)) {
@@ -88,8 +75,8 @@ public class SshKeyManager{
    }
 
    public void removeSshKey(String keyName) {
-      checkSession();
       try {
+         checkSession();
          String proj = SessionParameters.getSessionParameters().getJcloudsProj();
          cloudService.deleteSshKey(proj, keyName);
          applySshKeys();

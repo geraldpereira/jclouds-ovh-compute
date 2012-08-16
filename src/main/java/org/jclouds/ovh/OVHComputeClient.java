@@ -31,7 +31,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.ovh.ws.api.OvhWsException;
-import com.ovh.ws.api.auth.AuthProvider;
 import com.ovh.ws.cloud._public.instance.r3.CloudInstance;
 import com.ovh.ws.cloud._public.instance.r3.structure.CredentialsStruct;
 import com.ovh.ws.cloud._public.instance.r3.structure.DistributionStruct;
@@ -48,7 +47,7 @@ import com.ovh.ws.definitions.ovhgenerictype.r2.structure.CommandStatus;
  * @author David Krolak
  */
 @Singleton
-public class OVHComputeClient implements AuthProvider {
+public class OVHComputeClient {
 
    private final PublicCloudSessionHandler sessionHandler;
 
@@ -63,19 +62,11 @@ public class OVHComputeClient implements AuthProvider {
       this.cloudService = cloudService;
    }
    
-   private void checkSession() {
-      if (sessionHandler.getSessionWithToken() == null)
-         login();
+   private void checkSession() throws OvhWsException {
+      if (sessionHandler.getToken() == null)
+         throw new OvhWsException(0, "Could not log in on OVH services");
    }
 
-   /**
-    * login methods
-    */
-   private void login() {
-      if (!sessionHandler.isLoggin()) {
-         sessionHandler.login();
-      }
-   }
 
    public TaskStruct getTask(Long taskId) throws OvhWsException {
       return cloudService.getTask(SessionParameters.getSessionParameters().getJcloudsProj(), taskId);
@@ -175,13 +166,4 @@ public class OVHComputeClient implements AuthProvider {
       return cloudService.getLoginInformations(getServer(name).getId());
    }
 
-   @Override
-   public String getToken() {
-      return sessionHandler.getToken();
-   }
-
-   @Override
-   public String getSessionId() {
-      return sessionHandler.getSessionId();
-   }
 }
