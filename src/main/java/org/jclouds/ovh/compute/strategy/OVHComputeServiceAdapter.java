@@ -23,17 +23,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceAdapter;
 import org.jclouds.compute.domain.Template;
-import org.jclouds.compute.reference.ComputeServiceConstants;
 import org.jclouds.domain.LoginCredentials;
-import org.jclouds.logging.Logger;
 import org.jclouds.ovh.OVHComputeClient;
 
 import com.ovh.ws.api.OvhWsException;
@@ -52,9 +48,6 @@ import com.ovh.ws.cloud._public.instance.r3.structure.ZoneStruct;
 public class OVHComputeServiceAdapter implements
       ComputeServiceAdapter<InstanceStruct, OfferStruct, DistributionStruct, ZoneStruct> {
    private final OVHComputeClient client;
-   @Resource
-   @Named(ComputeServiceConstants.COMPUTE_LOGGER)
-   private Logger log = Logger.NULL;
 
    @Inject
    public OVHComputeServiceAdapter(OVHComputeClient client) {
@@ -74,8 +67,8 @@ public class OVHComputeServiceAdapter implements
          CredentialsStruct cred = client.getCredential(name);
          nodeCred = new NodeAndInitialCredentials<InstanceStruct>(from, from.getName() + "", LoginCredentials.builder()
                .user(cred.getLogin()).password(cred.getPassword()).build());
-      } catch (Exception e) {
-         log.error("createNodeWithGroupEncodedIntoName:{}", e.getMessage());
+      } catch (OvhWsException e) {
+         throw new RuntimeException(e);
       }
       return nodeCred;
    }
@@ -85,8 +78,8 @@ public class OVHComputeServiceAdapter implements
       List<OfferStruct> hw = new ArrayList<OfferStruct>();
       try {
          hw = client.listHardware();
-      } catch (Exception e) {
-         log.error("listHardwareProfiles:{}", e.getMessage());
+      } catch (OvhWsException e) {
+         throw new RuntimeException(e);
       }
       return hw;
    }
@@ -97,7 +90,7 @@ public class OVHComputeServiceAdapter implements
       try {
          im = client.listImages();
       } catch (OvhWsException e) {
-         log.error("listImages:{}", e.getMessage());
+         throw new RuntimeException(e);
       }
       return im;
    }
@@ -108,7 +101,7 @@ public class OVHComputeServiceAdapter implements
       try {
          d = client.getImage(arg0);
       } catch (OvhWsException e) {
-         log.error("getImage:{}", e.getMessage());
+         throw new RuntimeException(e);
       }
       return d;
    }
@@ -119,7 +112,7 @@ public class OVHComputeServiceAdapter implements
       try {
          nodes = client.listServers();
       } catch (OvhWsException e) {
-         log.error("listNodes:{}", e.getMessage());
+         throw new RuntimeException(e);
       }
       return nodes;
    }
@@ -130,7 +123,7 @@ public class OVHComputeServiceAdapter implements
       try {
          z = client.listZones();
       } catch (OvhWsException e) {
-         log.error("listLocations:{}", e.getMessage());
+         throw new RuntimeException(e);
       }
       return z;
    }
@@ -141,7 +134,7 @@ public class OVHComputeServiceAdapter implements
       try {
          i = client.getServer(id);
       } catch (OvhWsException e) {
-         log.error("getNode:{}", e.getMessage());
+         throw new RuntimeException(e);
       }
       return i;
    }
@@ -151,7 +144,7 @@ public class OVHComputeServiceAdapter implements
       try {
          client.destroyServer(id);
       } catch (OvhWsException e) {
-         log.error("destroyServer:{}", e.getMessage());
+         throw new RuntimeException(e);
       }
    }
 
@@ -160,7 +153,7 @@ public class OVHComputeServiceAdapter implements
       try {
          client.rebootServer(id);
       } catch (OvhWsException e) {
-         log.error("destroyServer:{}", e.getMessage());
+         throw new RuntimeException(e);
       }
    }
 
@@ -169,7 +162,7 @@ public class OVHComputeServiceAdapter implements
       try {
          client.startServer(id);
       } catch (OvhWsException e) {
-         log.error("resumeNode:{}", e.getMessage());
+         throw new RuntimeException(e);
       }
 
    }
@@ -179,7 +172,7 @@ public class OVHComputeServiceAdapter implements
       try {
          client.stopServer(id);
       } catch (OvhWsException e) {
-         log.error("suspendNode:{}", e.getMessage());
+         throw new RuntimeException(e);
       }
    }
    
