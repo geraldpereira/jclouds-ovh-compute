@@ -36,10 +36,10 @@ public class ZoneStructToLocation implements Function<ZoneStruct, Location> {
    @Override
    public Location apply(ZoneStruct from) {
       LocationBuilder builder = new LocationBuilder().scope(LocationScope.ZONE);
-      builder = builder.id(from.getName() + "");
-      builder = builder.description(from.getName() + "");
+      builder = builder.id(from.getName());
+      builder = builder.description(from.getName());
       builder = builder.parent(new LocationBuilder().scope(LocationScope.ZONE).id("ovh")
-            .description(from.getName() + "").build());
+            .description(from.getName()).build());
       return builder.build();
    }
 

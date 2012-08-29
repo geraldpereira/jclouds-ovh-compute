@@ -63,7 +63,7 @@ public class OVHComputeServiceAdapter implements
 
          // request credentials and convert it
          CredentialsStruct cred = client.getCredential(name);
-         return new NodeAndInitialCredentials<InstanceStruct>(from, from.getName() + "", LoginCredentials.builder()
+         return new NodeAndInitialCredentials<InstanceStruct>(from, from.getName(), LoginCredentials.builder()
                .user(cred.getLogin()).password(cred.getPassword()).build());
       } catch (OvhWsException e) {
          throw new RuntimeException(e);

@@ -95,11 +95,11 @@ public class InstanceStructToNodeMetadata implements Function<InstanceStruct, No
    public NodeMetadata apply(InstanceStruct from) {
       // convert the result object to a jclouds NodeMetadata
       NodeMetadataBuilder builder = new NodeMetadataBuilder();
-      builder.ids(from.getName() + "");
+      builder.ids(from.getName());
       builder.name(from.getName());
       builder.location(findLocationForServer.apply(from));
       builder.group(nodeNamingConvention.groupInUniqueNameOrNull(from.getName()));
-      builder.imageId(from.getDistributionName() + "");
+      builder.imageId(from.getDistributionName());
       Image image = findImageForServer.apply(from);
       if (image != null)
          builder.operatingSystem(image.getOperatingSystem());
@@ -140,7 +140,7 @@ public class InstanceStructToNodeMetadata implements Function<InstanceStruct, No
 
       @Override
       public boolean matches(InstanceStruct from, Hardware input) {
-         return input.getProviderId().equals(from.getOfferName() + "");
+         return input.getProviderId().equals(from.getOfferName());
       }
    }
 
@@ -154,7 +154,7 @@ public class InstanceStructToNodeMetadata implements Function<InstanceStruct, No
 
       @Override
       public boolean matches(InstanceStruct from, Image input) {
-         return input.getProviderId().equals(from.getDistributionName() + "");
+         return input.getProviderId().equals(from.getDistributionName());
       }
    }
 
@@ -169,7 +169,7 @@ public class InstanceStructToNodeMetadata implements Function<InstanceStruct, No
       @Override
       public boolean matches(InstanceStruct from, Location input) {
          // if (input==null) return true;
-         return input.getId().equals(from.getZoneName() + "");
+         return input.getId().equals(from.getZoneName());
       }
    }
 }

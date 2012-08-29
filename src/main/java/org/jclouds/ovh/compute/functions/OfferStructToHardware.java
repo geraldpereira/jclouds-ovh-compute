@@ -39,7 +39,7 @@ public class OfferStructToHardware implements Function<OfferStruct, Hardware> {
    @Override
    public Hardware apply(OfferStruct from) {
       HardwareBuilder builder = new HardwareBuilder();
-      builder.ids(from.getName() + "");
+      builder.ids(from.getName());
       builder.name(from.getName());
       builder.processors(ImmutableList.of(new Processor(Double.valueOf(from.getCores()), 1.0)));
       builder.ram(Integer.valueOf(from.getRam()));
