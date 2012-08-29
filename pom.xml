@@ -29,7 +29,7 @@
     <groupId>org.jclouds.labs</groupId>
     <artifactId>ovh-ws</artifactId>
 
-    <name>ovh compute api</name>
+    <name>ovh compute provider</name>
     <description>ovh compute components connected to r3 implementation of public cloud</description>
     <packaging>bundle</packaging>
 
